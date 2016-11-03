@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <style>
+  body,html{
+    height:100%;
+    width:100%;
+    margin: 0;
+    padding: 0;
+    font-family: "Microsoft Yahei";
+    font-size: 14px;
+    background: #666;
+  }
+  input{
+    font-family: "Microsoft Yahei";
+    outline: none;
+  }
+  ul,li{
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+  a{
+    text-decoration: none;
+    color:#fff;
+  }
+  .linkage-container{
+    width: 450px;
+    position: absolute;
+    border:1px solid #000;
+    background:#fff;
+    padding: 10px;
+    top: 29px;
+    display: none;
+    z-index: 1;
+  }
+  .linkage-container .tabs{
+    height:40px;
+    border-bottom:1px solid #000;
+  }
+  .linkage-container .tabs li{
+    height: 40px;
+    padding:0 20px;
+    float: left;
+    color:#666;
+    //background: #fff;
+    line-height:40px;
+    cursor: pointer;
+    border-bottom:1px solid #000;
+  }
+  .linkage-container .tabs .active{
+    background-color: #fff;
+    border:1px solid #000;
+    border-bottom:none;
+    color:#666;
+  }
+  .linkage-container .tabs li:nth-child(2){
+    display:none;
+  }
+  .linkage-container .tabs li:nth-child(3){
+    display:none;
+  }
+  .linkage-container .tabs-container{
+    width: 100%;
+    margin-top:2px;
+  }
+  .linkage-container :after {
+    clear:both;
+    content:'';
+    display:block;
+    width: 0;
+    height: 0;
+  }
+  .linkage-container .tabs-container li{
+    width:100%;
+    background:#fff;
+    display: none;
+  }
+  .linkage-container .tabs-container li span{
+    display: block;
+    float: left;
+    height:30px;
+    line-height: 30px;
+    padding: 0 20px;
+    background-color: #ccc;
+    margin:5px;
+    cursor: pointer;
+  }
+  .linkage-container .tabs-container li span:hover{
+    background-color:#4673B7;
+    color:#fff;
+  }
+  .linkage-container .tabs-container li span.active_{
+    background-color:#4673B7;
+    color:#fff;
+  }
+  .linkage-container .tabs-container .active{
+    display: block;
+  }
+  .select-container{
+    height:30px;
+    margin:100px auto;
+    width:200px;
+    position:relative;
+  }
+  .select-container .select-rel{
+    padding: 5px 15px;
+    background-color: #fff;
+    border:1px solid #000;
+    cursor: pointer;
+    position: absolute;
+    z-index: 2;
+    top:0
+  }
+  .select-container .hover{
+    border-bottom: none;
+  }
+  </style>
+  <title>Document</title>
+</head>
+<body>
+  <div class="select-container">
+    <input type="hidden" >
+    <span class="select-rel">请选择</span>
+    <div class="linkage-container">
+      <ul class="tabs">
+        <li class="active">请选择</li>
+        <li>请选择</li>
+        <li>请选择</li>
+      </ul>
+      <ul class="tabs-container">
+        <li  class="active">请选择</li>
+        <li>先选择上一项</li>
+        <li>先选择上一项</li>
+      </ul>
+    </div>
+  </div>
+  <script src="jquery-1.7.2.min.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function(){
+      var $tabs = $(".tabs li");
+      var $tabsContainer = $(".tabs-container li");
+      $(".select-container").hover(function(){
+        $(this).children('div').show();
+        $(this).children('span').addClass('hover');
+      },function(){
+        $(this).children('div').hide();
+        $(this).children('span').removeClass('hover')
+      });
+      $tabs.on("click",function(){
+        var index = $(this).index();
+        var $this = $(this);
+        $this.addClass('active').siblings().removeClass('active');
+        $tabsContainer.eq(index).addClass('active').siblings().removeClass('active');
+      })
+      $.ajax({
+        url:"data.json",
+        success:function(data,i){
+          init($tabsContainer,data,0)
+          function init(elem,data,i){
+            var strVal = "";
+            $.each(data,function(){
+              strVal+='<span>'+this.val+'</span>';
+            })
+            elem.eq(i).show().html(strVal).find("span").click(function(){
+              var $this = $(this);
+              var index = $(this).index();
+              var data_ = data[index].city;
+              //跳转选择下一项
+              $tabs.eq(i+1).trigger('click');
+              //赋值
+              $tabs.eq(i).html($this.text());
+              //判断点击父选项还原默认提示
+              $tabs.eq(i).nextAll().html("请选择");
+              //elem.eq(i+1).nextAll().html("先选择上一项");
+              $tabs.eq(i+1).nextAll().hide();//后面项隐藏；
+              $tabs.eq(i+1).show();//下一项显示
+              //最后一项时取值
+              if(i === $tabs.length-1){
+                var val = "";
+                for(var j = 0;j < $tabs.length;j++ ){
+                  val+=$tabs.eq(j).text();
+                }
+                $(".select-rel").html(val).prev().val(val);
+                //赋值
+                $this.parents(".linkage-container").hide();
+              }
+              //i === $tabs.length-1 ?  $this.parent().parent().hide() : null;
+              //已选择添加标记
+              $this.addClass('active_').siblings().removeClass('active_');
+              //下一项不存在时 不做任何处理
+              if(!$tabs.eq(i+1).length){
+                return;
+              }
+              //递归
+              init($tabsContainer,data_,i+1);
+            });
+          }
+        }
+      });
+    })
+  </script>
+</body>
+</html>

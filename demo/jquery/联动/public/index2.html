@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <style>
+  body,html{
+    margin: 0;
+    padding: 0;
+    font-family: "Microsoft Yahei";
+    font-size: 14px;
+    background: #666;
+  }
+  input{
+    font-family: "Microsoft Yahei";
+    outline: none;
+  }
+  ul,li{
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+  a{
+    text-decoration: none;
+    color:#fff;
+  }
+  .linkage-container{
+    width: 600px;
+    margin:0 auto;
+    height:40px;
+    position: relative;
+  }
+  .linkage-container .tabs{
+    height:40px;
+  }
+  .linkage-container .tabs li{
+    height: 40px;
+    padding:0 20px;
+    float: left;
+    color:#fff;
+    background: #000;
+    line-height:40px;
+    cursor: pointer;
+  }
+  .linkage-container .tabs .active{
+    background-color: #fff;
+    color:#666;
+  }
+  .linkage-container .tabs-container{
+    width: 100%;
+    height:300px;
+    position: absolute;
+    display: none;
+  }
+  .linkage-container .tabs-container li{
+    width:100%;
+    height:100%;
+    background:#fff;
+    position: absolute;
+    display: none;
+  }
+  .linkage-container .tabs-container li span{
+    display: block;
+    float: left;
+    height:30px;
+    line-height: 30px;
+    padding: 0 20px;
+    background-color: #ccc;
+    margin:5px;
+    cursor: pointer;
+  }
+  .linkage-container .tabs-container li span:hover{
+    background-color:#4673B7;
+    color:#fff;
+  }
+  .linkage-container .tabs-container li span.active_{
+    background-color:#4673B7;
+    color:#fff;
+  }
+  .linkage-container .tabs-container .active{
+    display: block;
+  }
+  </style>
+  <title>Document</title>
+</head>
+<body>
+  <div class="linkage-container">
+    <ul class="tabs">
+      <li class="active">请选择</li>
+      <li>请选择</li>
+      <li>请选择</li>
+    </ul>
+    <ul class="tabs-container">
+      <li  class="active">请选择</li>
+      <li>先选择上一项</li>
+      <li>先选择上一项</li>
+    </ul>
+  </div>
+  <script src="jquery-1.7.2.min.js"></script>
+  <script type="text/javascript">
+    $(document).ready(function(){
+      var $tabs = $(".tabs li");
+      var $tabsContainer = $(".tabs-container li");
+      $(".linkage-container").hover(function(){
+        $(this).find("ul").last().show();
+      },function(){
+        $(this).find("ul").last().hide();
+      });
+      $tabs.on("click",function(){
+        var index = $(this).index();
+        var $this = $(this);
+        $this.addClass('active').siblings().removeClass('active');
+        $tabsContainer.eq(index).addClass('active').siblings().removeClass('active');
+      })
+      $.ajax({
+        url:"data.json",
+        success:function(data,i){
+          init($tabsContainer,data,0)
+          function init(elem,data,i){
+            var strVal = "";
+            $.each(data,function(){
+              strVal+='<span>'+this.val+'</span>';
+            })
+            elem.eq(i).html(strVal).find("span").click(function(){
+              var $this = $(this);
+              var index = $(this).index();
+              var data_ = data[index].city;
+              //跳转选择下一项
+              $tabs.eq(i+1).trigger('click');
+              //赋值
+              $tabs.eq(i).html($this.text());
+              //判断点击父选项还原默认提示
+              $tabs.eq(i).nextAll().html("请选择");
+              elem.eq(i+1).nextAll().html("先选择上一项")
+              i === $tabs.length-1 ?  $this.parent().parent().hide() : null;
+              //已选择添加标记
+              $this.addClass('active_').siblings().removeClass('active_');
+              if(!elem.eq(i+1).length){
+                return;
+              }
+              init($tabsContainer,data_,i+1)
+            });
+          }
+        }
+      });
+    })
+  </script>
+</body>
+</html>
