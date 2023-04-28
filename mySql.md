@@ -70,3 +70,56 @@
   6. 重置密码会使` MySQL `权限表恢复默认状态,你需要重新配置用户和权限。
   7. 上述方法只适用于本地 root 用户,对远程用户无效。如果你忘记远程 root 用户的密码,需要手动修改用户表。
 
+#### mac(m1)下载安装`mySQL`
+
+* 下载mysql-8.0.32-macos13-arm64.dmg，按照提示安装
+
+* 设置环境变量
+
+  ```shell
+  open ~/.zshrc
+  
+  ## 末尾添加
+  export PATH="/usr/local/mysql/bin:$PATH"
+  export PATH=$PATH:/usr/local/mysql/support-files
+  ```
+
+* 开启停止重启命令
+
+  ```shell
+  sudo mysql.server start
+  sudo mysql.server stop
+  sudo mysql.server restart
+  ```
+
+* 遇到权限问题
+
+  ```shell
+  sudo chmod -R 777 /usr/local/mysql/data
+  ```
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  -- INSERT INTO users ( username, `password`, realname )
+  -- VALUES
+  	-- ( 'lishi', '123456', '李四' );
+  -- SELECT * FROM USERS;
+  -- SELECT ID, USERNAME FROM USERS;
+  -- SELECT * FROM USERS WHERE username = 'zhangsan'
+  -- SELECT * FROM USERS WHERE username='zhangsan' or `password`='123456'
+  -- SELECT * FROM USERS WHERE username like '%s%'
+  -- SELECT * FROM USERS WHERE username like '%s%' order by id desc
+
+  sudo chmod -R 777 /usr/local/mysql/data
