@@ -100,26 +100,52 @@
 
   
 
+#### mySQL常用操作
+
+* 创建数据库
+
+  ```mysql
+  CREATE DATANASE testdb;
+  ```
+
+* 显示所有数据库
+
+  ```mysql
+  SHOW DATABASES;
+  ```
+
+* 选择数据库
+
+  ```mysql
+  USE testdb;
+  ```
+
+* 显示所有表
+
+  ```mysql
+  SHOW TABLES;
+  ```
+
+* 插入数据
+
+  ```mysql
+  INSERT INTO users (username, `password`, realname) VALUES ('lishi', '123456', '李四')
+  ```
+
+* 查询数据
+
+  ```mysql
+  SELECT * FROM USERS; # 查询users表的所有数据
+  SELECT ID, USERNAME FROM USERS; # 查询指定列的数据
+  SELECT * FROM USERS WHERE username = 'zhangsan' # 按条查询
+  SELECT * FROM USERS WHERE username='zhangsan' and `password`='123456' #
+  SELECT * FROM USERS WHERE username='zhangsan' or `password`='123456' #
+  SELECT * FROM USERS WHERE username like '%s%'# 模糊查询
+  SELECT * FROM USERS WHERE username like '%s%' order by id desc # 模糊查询，倒序
+  
+  # password为关键词，加``
+  ```
+
   
 
-  
 
-  
-
-  
-
-  
-
-  
-
-  -- INSERT INTO users ( username, `password`, realname )
-  -- VALUES
-  	-- ( 'lishi', '123456', '李四' );
-  -- SELECT * FROM USERS;
-  -- SELECT ID, USERNAME FROM USERS;
-  -- SELECT * FROM USERS WHERE username = 'zhangsan'
-  -- SELECT * FROM USERS WHERE username='zhangsan' or `password`='123456'
-  -- SELECT * FROM USERS WHERE username like '%s%'
-  -- SELECT * FROM USERS WHERE username like '%s%' order by id desc
-
-  sudo chmod -R 777 /usr/local/mysql/data
