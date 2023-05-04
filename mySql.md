@@ -42,8 +42,8 @@
 * 启动 `MySQL` 服务
 
   ```shell
-  et start mysql # 启动
-  et stop mysql # 关闭
+  net start mysql # 启动
+  n et stop mysql # 关闭
   ```
 
 * 登录
@@ -98,9 +98,13 @@
   sudo chmod -R 777 /usr/local/mysql/data
   ```
 
-  
-
 #### mySQL常用操作
+
+* 查询版本
+
+  ```mysql
+  SELECT VERSION()
+  ```
 
 * 创建数据库
 
@@ -135,17 +139,78 @@
 * 查询数据
 
   ```mysql
-  SELECT * FROM USERS; # 查询users表的所有数据
-  SELECT ID, USERNAME FROM USERS; # 查询指定列的数据
-  SELECT * FROM USERS WHERE username = 'zhangsan' # 按条查询
-  SELECT * FROM USERS WHERE username='zhangsan' and `password`='123456' #
-  SELECT * FROM USERS WHERE username='zhangsan' or `password`='123456' #
-  SELECT * FROM USERS WHERE username like '%s%'# 模糊查询
-  SELECT * FROM USERS WHERE username like '%s%' order by id desc # 模糊查询，倒序
+  SELECT * FROM users; # 查询users表的所有数据
+  SELECT id, username FROM users; # 查询指定列的数据
+  SELECT * FROM users WHERE username = 'zhangsan' # 按条查询
+  SELECT * FROM users WHERE username = 'zhangsan' and `password` = '123456' #
+  SELECT * FROM users WHERE username = 'zhangsan' or `password` = '123456' #
+  SELECT * FROM users WHERE username like '%s%' # 模糊查询
+  SELECT * FROM users WHERE username like '%s%' order by id desc # 模糊查询，倒序
   
   # password为关键词，加``
   ```
 
+* 更新数据
+
+  ```mysql
+  UPDATE users SET realname = '李斯' WHERE username = 'lisi'
+  ```
+
+* 删除数据
+
+  ```mysql
+  # 真删除
+  DELETE FROM users WHERE username = 'lisi'
+  
+  # 软删除：添加一列state默认值等于1
+  UPDATE users SET state = 0 WHERE	username = 'lisi';
+  SELECT * FROM	users WHERE	state <> 0;
+  
+  ```
+
   
 
+#### nodejs操作mySQL
+
+* nodejs连接mySQL8失败
+
+  ```mysql
+  # 新的mysql模块并未完全支持MySQL8的“caching_sha2_password”加密方式，而“caching_sha2_password”在MySQL 8中是默认的加密方式。
+  
+  # 下面的方式命令是默认已经使用了“caching_sha2_password”加密方式，该账号、密码无法在mysql模块中使用。
+  ALTER USER 'root'@'localhost' IDENTIFIED BY '123456'; 
+  
+  
+  # 解决方法是从新修改用户root的密码，并指定mysql模块能够支持的加密方式：
+  ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456';
+  # 刷新权限
+  FLUSH PRIVILEGES;
+  ```
+
+  
+
+```javascript
+/**
+	npm install mysql
+*/
+const mysql = require('mysql')
+
+const connection = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '123456',
+  port: '3306',
+  database: 'myblog'
+})
+connection.connect()
+const sql = 'select * from users;'
+connection.query(sql, (error, result) => {
+  if (error) {
+    console.log(error)
+    return
+  }
+  console.log(result)
+})
+connection.end()
+```
 
