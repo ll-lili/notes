@@ -16,6 +16,16 @@ server.listen(3000, (req, res) => {
 const http = require('http')
 const url = require('url')
 const querystring = require('querystring')
+// 获取query
+function getQuery (query) {
+  const params = {}
+  const queryParts = query.split('&');
+  for (let i = 0; i < queryParts.length; i++) {
+    const queryParam = queryParts[i].split('=');
+    params[queryParam[0]] = queryParam[1];
+  } 
+  return params
+}
 const server = http.createServer((req, res) => {
   const method = req.method // 请求类型
   const url = req.url // 请求的路径
@@ -271,3 +281,58 @@ exports.list = (req, res) => {
   ]
 }
 ```
+
+##### src/conf/db.js
+
+```javascript
+const env = process.env.NODE_ENV // 环境变量
+
+let MYSQL_CONF 
+if (env === "development") {
+  MYSQL_CONF = {
+    host: "localhost",
+    user: "root",
+    password: "123456",
+    port: "3306",
+    database: "myblog",
+  }
+}
+if (env === "production") {
+  MYSQL_CONF = {
+    host: "localhost",
+    user: "root",
+    password: "123456",
+    port: "3306",
+    database: "myblog",
+  }
+}
+module.exports = MYSQL_CONF
+```
+
+##### src/db/mysql.js
+
+```javascript
+const mysql = require('mysql')
+const MYSQL_CONF = require('../conf/db')
+
+// 创建链接对象
+const connection = mysql.createConnection(MYSQL_CONF)
+
+// 开始链接
+connection.connect()
+
+// 统一执行sql的函数
+function exec (sql) {
+  return new Promise((resolve, reject) => {
+    connection.query(sql, (error, res) => {
+      if (error) {
+        return reject(error)
+      }
+      resolve(res)
+    })
+  })
+}
+
+module.export = { exec }
+```
+
