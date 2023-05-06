@@ -172,7 +172,7 @@
 
 #### nodejs操作mySQL
 
-* nodejs连接mySQL8失败
+* `mysql`连接mySQL8失败,也可以使用`mysql2`模块操作mySQL
 
   ```mysql
   # 新的mysql模块并未完全支持MySQL8的“caching_sha2_password”加密方式，而“caching_sha2_password”在MySQL 8中是默认的加密方式。
