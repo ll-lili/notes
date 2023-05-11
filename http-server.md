@@ -438,7 +438,7 @@ redisClient.get('username', (err, val) => {
   const redis = require('redis')
 
   const redisClient = redis.createClient({
-    url: 'redis://127.0.0.1:6379'
+    url: 'redis://127.0.0.1:6379' // redis[s]://[[username][:password]@][host][:port][/db-number]
   })
 
   redisClient.on('error', (err) => {
