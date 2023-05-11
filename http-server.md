@@ -371,3 +371,87 @@ const serverHandle = (req, res) => {
 }
 ```
 
+#### session原理
+
+1. 当用户第一次访问网站时,服务器会创建一个 Session 对象,生成一个 Session ID 发送给客户端。
+2. 客户端在以后的每次请求中都发送这个 Session ID.
+3. 服务器根据接收到的 Session ID 查找对应的 Session 对象,并获取其中的数据。
+4. 当 Session 过期或被销毁时,服务器就会删除对应的 Session 对象。
+
+```javascript
+const SESSION_DATA = {} // 存储session对象
+
+const serverHandle = (req, res) => {
+    // 解析session
+    let needSetCookie = false
+    let ssid = req.cookie.ssid
+    if (ssid && !SESSION_DATA[ssid]) {
+        SESSION_DATA[ssid] = {}
+    } else {
+        ssid = `${Date.now()}_${Math.random()}`
+        SESSION_DATA[ssid] = {}
+        needSetCookie = true
+    }
+    req.session = SESSION_DATA[ssid]
+    
+    if (needSetCookie) {
+        res.setHeader('Set-Cookie', `ssid=${ssid};path=/;httpOnly; expires=${getCookieExpires()}`)
+    }
+    // 登录成功设置 req.session
+
+}
+```
+
+#### Redis(windows安装)
+
+* https://github.com/tporadowski/redis/releases
+* 打开一个 **cmd** 窗口 使用 cd 命令切换目录到 **C:\redis** 运行：redis-server.exe redis.windows.conf
+* 另启一个 cmd 窗口： redis-cli.exe -h 127.0.0.1 -p 6379
+
+#### nodejs链接redis
+
+```javascript
+// 安装redis依赖 npm install redis （"redis": "^2.8.0"）
+const redis = require('redis')
+
+// 创建客户端
+const redisClient = redis.createClient(6379, '127.0.0.1')
+
+redisClient.on('error', err => {
+    console.log(err)
+})
+
+// 测试
+redisClient.set('username', 'zhangsan', redis.print)
+redisClient.get('username', (err, val) => {
+    if (err) {
+        console.log(err)
+        return
+    }
+    console.log(val)
+    // 退出
+    redisClient.quit()
+})
+
+// "redis": "^4.6.6"
+;(async function () {
+  const redis = require('redis')
+
+  const redisClient = redis.createClient({
+    url: 'redis://127.0.0.1:6379'
+  })
+
+  redisClient.on('error', (err) => {
+    console.log(err)
+  })
+  await redisClient.connect()
+
+  await redisClient.set('username', 'lisi')
+  const val = await redisClient.get('username')
+  console.log(val)
+  await redisClient.disconnect()
+})()
+
+
+```
+

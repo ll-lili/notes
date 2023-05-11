@@ -363,7 +363,7 @@ export default {
   ```javascript
   let obj = {}
   let val = 1
-
+  
   Object.defineProperty(obj, 'prop', {
     get: function () {
       console.log('Getting value')
@@ -374,7 +374,7 @@ export default {
       val = newVal
     }
   })
-
+  
   console.log(obj.prop) // Getting value, 1
   obj.prop = 2 // Setting value
   console.log(obj.prop) // Getting value, 2
@@ -664,7 +664,7 @@ Vue 中组件本身是一个类每次使用需要实例化一个对象，如果 
     ```vue
     <script setup>
     import { reactive, toref } from 'vue'
-
+    
     const state = reactive({
         username: 'zhangsan'
         age: 18
@@ -686,7 +686,7 @@ Vue 中组件本身是一个类每次使用需要实例化一个对象，如果 
     ```vue
     <script setup>
     import { reactive, toref } from 'vue'
-
+    
     const state = reactive({
         username: 'zhangsan'
         age: 18
@@ -1161,3 +1161,4 @@ export default {
 - 前者无需 useMemo useCallback,因为 setup 只调用一次
 - 前者无需考虑调用顺序，而后者需要保证 hooks 的顺序一致
 - 前者 reactive+ref 比后者 useState，要难理解
+
