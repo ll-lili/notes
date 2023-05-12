@@ -287,33 +287,53 @@ exports.list = (req, res) => {
 ```javascript
 const env = process.env.NODE_ENV // 环境变量
 
-let MYSQL_CONF 
-if (env === "development") {
+let MYSQL_CONF
+let REDIS_CONF
+
+if (env === 'development') {
   MYSQL_CONF = {
-    host: "localhost",
-    user: "root",
-    password: "123456",
-    port: "3306",
-    database: "myblog",
+    host: 'localhost',
+    user: 'root',
+    port: '3306',
+    password: '123456',
+    database: 'myblog',
+    waitForConnections: true
+  }
+  REDIS_CONF = {
+    host: 'localhost',
+    user: '',
+    port: '6379',
+    password: ''
   }
 }
-if (env === "production") {
+if (env === 'production') {
   MYSQL_CONF = {
-    host: "localhost",
-    user: "root",
-    password: "123456",
-    port: "3306",
-    database: "myblog",
+    host: 'localhost',
+    user: 'root',
+    port: '3306',
+    password: '123456',
+    database: 'myblog'
+  }
+  REDIS_CONF = {
+    host: 'localhost',
+    user: '',
+    port: '6379',
+    password: ''
   }
 }
-module.exports = MYSQL_CONF
+
+module.exports = {
+  MYSQL_CONF,
+  REDIS_CONF
+}
+
 ```
 
 ##### src/db/mysql.js
 
 ```javascript
 const mysql = require('mysql')
-const MYSQL_CONF = require('../conf/db')
+const { MYSQL_CONF } = require('../conf/db')
 
 // 创建链接对象
 const connection = mysql.createConnection(MYSQL_CONF)
@@ -334,6 +354,32 @@ function exec (sql) {
 }
 
 module.export = { exec }
+```
+
+##### src/db/redis.js
+
+```javascript
+// redis4.6.6
+const { createClient } = require('redis')
+const { REDIS_CONF } = require('../conf/db')
+const { user, password, host, port } = REDIS_CONF
+
+const PASSWORD = password ? `:${password}@` : ''
+const PORT = port ? `:${port}` : ''
+// 创建客户端
+const redisClient = createClient({
+  url: `redis://${user}${PASSWORD}${host}${PORT}`
+})
+
+// 监听错误
+redisClient.on('error', (err) => console.log('Redis Client Error', err))
+
+// 建立链接
+redisClient.connect().then(() => {
+  console.log('redis connect!')
+})
+module.exports = redisClient
+
 ```
 
 
