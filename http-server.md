@@ -694,3 +694,87 @@ redis.get("mykey").then((result) => {
 })
 ```
 
+#### 写日志
+
+```javascript
+const fs = require('fs')
+const path = require('path')
+
+// 生成writeStream
+function createWriteStream(filename) {
+    const fullFileName = path.join(__dirname, '../', '../', 'logs', filename)
+    const writeStream = fs.createWriteStream(fullFileName, {
+        flags: 'a' // 追加
+    })
+    return writeStream
+}
+// 写日志
+function writeLog(writeStream, log) {
+	writeStream.write(log + '\n') // 关键代码
+}
+// 写access(访问)日志
+const accessWriteStream = createWriteStream('access.log')
+exports.access = (log) => {
+    writeLog(accessWriteStream, log)
+}
+```
+
+#### 日志拆分（linux,macos）
+
+* 定时任务执行sh
+
+* crontab - e
+
+  ```
+  * 0 * * * sh /copy.sh
+  ```
+
+* crontab -l 查看定时任务
+
+```sh
+#!/bin/sh
+cd /log
+cp access.log $(date +%Y-%m-%d).access.log
+echo "" > access.log
+```
+
+#### 日志分析
+
+* 针对access.log日志，分析chrome的占比
+* 日志是按行存储的，一行就是一条日志
+* 使用nodejs的readline（基于stream,效率高）
+
+```javascript
+const fs = require('fs')
+const path = require('path')
+const readline = require('readline')
+
+// 文件名
+const filename = path.resolve(__dirname, 'access.log')
+// 创建read stream
+const readStream = fs.createReadStream(filename)
+// 创建readline对象
+const rl = readline.createInterface({
+    input: readStream
+})
+let chromeNum = 0
+let sum = 0
+// 逐行读取
+rl.on('line', (lineData) => {
+    if (!lineData) {
+        return
+    }
+    // 记录总数
+    sum++
+    const arr = lineData.split(' -- ')
+    if (arr[2]?.indexOf('Chrome') > 0) {
+        // 累加Chrome数量
+        chromeNum++
+    }
+})
+// 监听读取完成
+rl.on('close', () => {
+    console.log('chrome占比： ' + chromeNum / sum)
+})
+```
+
