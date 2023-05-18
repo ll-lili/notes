@@ -778,3 +778,66 @@ rl.on('close', () => {
 })
 ```
 
+#### 安全
+
+* sql注入：窃取数据库内容
+
+  ```mysql
+  # 攻击方式：输入一个sql片段，最终拼接一段攻击diamagnetic
+  select username, realname from users where username = 'zhangsan'-- ' and password = '123456';
+  ```
+
+  ```javascript
+  // 预防措施： nodejs 通过 mysql.escape函数处理输入内容即可
+  const sql = `select username, realname from users where username = ${escape(username)} and password = ${escape(password)};`
+  ```
+
+  
+
+* XSS攻击：窃取前端cookie内容
+
+  ```javascript
+  // 攻击方式： 在页面展示内容掺杂js代码，以获取网页信息
+  // 预防措施： 转换生成js的特殊字符
+  /*
+  	& -> &amp;
+  	< -> &lt;
+  	> -> &gt;
+  	" -> &quot;
+  	' -> &#x27;
+  	/ -> &#x2F;
+  */
+  // npm i xss --save
+  const xss = require('xss')
+  
+  let content = '<script><slert('xss')script>'
+  content = xss(content)
+  ```
+
+  
+
+* 密码加密:  保障用户信息安全
+
+  ```javascript
+  /*
+  	node内置模块crypto
+  	我们创建了一个 crypto 对象，使用 createHash 方法创建了一个 MD5 加密器。
+  	然后使用 update 方法将要加密的内容传递给加密器。
+  	最后，调用 digest 方法并传入 'hex' 参数，以获取加密后的值的十六进制表示形式。
+  */
+  const crypto = require('crypto')
+  // 密钥
+  const SECRET_KEY = '8f566ccb-b95c-45af-aade-28aa64c46323'
+  // MD5加密
+  function md5(content) {
+  	let md5 = crypto.createHash('md5')
+      return md5.update(content).digest('hex')
+  }
+  // 加密函数
+  exports.getPassword = (password) => {
+      const str = `password=${password}&key=${SECRET_KEY}`
+      return md5(str)
+  }
+  ```
+
+  
