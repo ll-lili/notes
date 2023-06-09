@@ -58,3 +58,38 @@
      
      // https://www.lanmper.cn/jquery
      ```
+
+#### jQuery对象
+
+* 通过jQuery核心函数获取到的对象就是jQuery对象
+* jQuery对象是jQuery中定义的对象
+* 提供很多简单易用的api,简化原生DOM操作
+* jQuery对象本质是一个DOM对象的数组（类数组）
+* 可以通过索引获取jQuery对象中的DOM对象
+* 修改jQuery对象时，会自动修改jQuery中所有的元素($('div').attr('id')会获得第一个元素的id)
+* 通常情况下jQuery对象方法的返回值依然是一个jQuery对象，从而可以进行链式调用
+
+##### jQuery对象操作class
+
+```javascript
+$('.box').addClass('box1')
+$('.box').addClass(['box1', 'box2'])
+// 函数作为参数，函数会调用多次，由jQuery对象的length决定
+$('.box').addClass(function(index, className){
+    if (index % 2 === 0 ) {
+        // 回调函数中this是当前元素DOM对象,调用原生对象方法
+        // this.classList.add('box3')
+        // $(this)jQuery对象，调用jQuery对象方法
+        // $(this).addClass('box4')
+        return 'box5'
+    }
+	// 函数返回值将成为当前元素的class
+})
+/**
+	其他class操作
+	hasClass() 检查jQuery对象是否包括某个class,返回一个boolean
+	removeClass() 移除class
+	toggleClass() 在元素中切换类名
+*/
+```
+
