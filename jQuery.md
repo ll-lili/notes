@@ -93,3 +93,106 @@ $('.box').addClass(function(index, className){
 */
 ```
 
+##### jQuery对象复制`.clone()`
+
+* clone()可以复制jQuery对象
+
+* #### [.clone( [withDataAndEvents \] [, deepWithDataAndEvents ] )](https://api.jquery.com/clone/#clone-withDataAndEvents-deepWithDataAndEvents)
+
+* 第一个参数：一个布尔值，是否应将事件处理程序与元素一起复制。最新版本默认值都为false，有版本差异
+
+* 第二个参数：是否应复制克隆元素的所有子元素的事件处理程序和数据。最新版本默认值都为false，有版本差异
+
+* 第二个参数：其值与第一个参数的值匹配（默认为 `false` ）
+
+```javascript
+const $firstLi = $('ul li:first-child')
+const $cloneLi = $firstLi.clone()
+$('.ul2').append($cloneLi)
+```
+
+##### jQuery 容器操作（DOM插入：外部，父级）
+
+* `.unwrap([selector])`从 DOM 中删除匹配元素集的父元素，将匹配的元素保留在其位置。
+
+  ```javascript
+  /**
+  	selector要检查父元素的选择器。如果元素的父元素与选择器不匹配，则不会解开该元素的包装。
+  */
+  var $p = $( "p" );
+  $( "button" ).on( "click", function() {
+    if ( pTags.parent().is( "div" ) ) {
+      pTags.unwrap();
+    } else {
+      pTags.wrap( "<div></div>" );
+    }
+  });
+  ```
+
+* `.wrap(wrappingElement)`将 HTML 结构包装在匹配元素集中的每个元素外面。
+
+  ```javascript
+  /**
+  	wrappingElement: 选择器、元素、HTML 字符串或 jQuery 对象，指定要环绕匹配元素的结构。
+  	当您传递包含多个元素的 jQuery 集合或与多个元素匹配的选择器时，将使用第一个元素。
+  */
+  $('p').wrap('<div></div>')
+  $('p').wrap(document.createElement('div'))
+  $('p').wrap($('.wrap'))
+  /**
+  	.wrap( function )
+  	返回 HTML 内容或 jQuery 对象的回调函数，以环绕匹配的元素。
+  	接收集合中元素的索引位置作为参数。在函数中， this 引用集合中的当前元素。
+  */
+  
+  $( ".inner" ).wrap(function(index) {
+    return "<div class='" + $( this ).text() + "'></div>";
+  });
+  ```
+
+* `wrapAll(wrappingElement)` 将HTML 结构包装在匹配元素集中的所有元素外面。
+* `wrapInner(wrappingElement)` 将 HTML 结构包装在匹配元素集中每个**元素的内容**外面。
+
+##### jQuery添加子元素（DOM插入：内部）
+
+* `.append()`将**参数指定的内容**插入到匹配元素集中每个**元素的末尾**。
+
+  ```javascript
+  $('.box1').append('<div class="box2"></div>')
+  ```
+
+* `.appendTo()`将**匹配元素集中的每个元素**插入到目标的末尾。
+
+  ```javascript
+  $('<div class="box2"></div>').appendTo('.box')
+  ```
+
+* `.prepend()`将参数指定的内容插入到匹配元素集中每个元素的开头。
+
+* `.prependTo()`将匹配元素集中的每个元素插入到目标的开头。
+* `.html()`获取匹配元素集中第一个元素的 HTML 内容，或设置每个匹配元素的 HTML 内容。
+* `.text()`获取匹配元素集中每个元素的组合文本内容（包括其后代），或设置匹配元素的文本内容。
+
+##### jQuery添加同级元素（DOM插入：外部，同级）
+
+* `.after()`在匹配元素集中的每个**元素之后**插入由参数指定的内容。
+
+* `.before()`在匹配元素集中的每个**元素之前**插入由参数指定的内容。
+* `insertAfter()`在目标之后插入匹配元素集中的每个元素。
+
+* `insertBefore()`在目标之前插入匹配元素集中的每个元素。
+
+##### jQuery删除DOM
+
+* `.detach([selector])`从 DOM 中删除匹配的元素集。
+* `.remove([selector])`从 DOM 中删除匹配的元素集（和绑定事件）。
+* `.empty()`从 DOM 中删除匹配元素集的所有子节点。
+* `.unwrap([selector])`从 DOM 中删除匹配元素集的父元素，将匹配的元素保留在其位置。
+
+##### jQuery 替换DOM
+
+* `replaceAll`()将每个目标元素替换为匹配的元素集。
+* `replaceWith()`将匹配元素集中的每个元素替换为提供的新内容，并返回已删除的元素集。
+
+##### jQuery操作属性
+
