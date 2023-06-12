@@ -129,7 +129,7 @@ $('.ul2').append($cloneLi)
   });
   ```
 
-* `.wrap(wrappingElement)`将 HTML 结构包装在匹配元素集中的每个元素外面。
+* `.wrap(wrappingElement)`将 HTML 结构包装在匹配元素集中的**每个元素外面**。
 
   ```javascript
   /**
@@ -150,7 +150,7 @@ $('.ul2').append($cloneLi)
   });
   ```
 
-* `wrapAll(wrappingElement)` 将HTML 结构包装在匹配元素集中的所有元素外面。
+* `wrapAll(wrappingElement)` 将HTML 结构包装在匹配元素集中的**所有元素外面**。
 * `wrapInner(wrappingElement)` 将 HTML 结构包装在匹配元素集中每个**元素的内容**外面。
 
 ##### jQuery添加子元素（DOM插入：内部）
@@ -178,21 +178,67 @@ $('.ul2').append($cloneLi)
 * `.after()`在匹配元素集中的每个**元素之后**插入由参数指定的内容。
 
 * `.before()`在匹配元素集中的每个**元素之前**插入由参数指定的内容。
-* `insertAfter()`在目标之后插入匹配元素集中的每个元素。
+* `.insertAfter()`在目标之后插入匹配元素集中的每个元素。
 
-* `insertBefore()`在目标之前插入匹配元素集中的每个元素。
+* `.insertBefore()`在目标之前插入匹配元素集中的每个元素。
 
 ##### jQuery删除DOM
 
 * `.detach([selector])`从 DOM 中删除匹配的元素集。
-* `.remove([selector])`从 DOM 中删除匹配的元素集（和绑定事件）。
+
+  ```javascript
+  /**
+  	selector一个选择器表达式，用于筛选要删除的匹配元素集。
+  	.detach() 方法与 .remove() 相同，只是 .detach() 保留与已删除元素关联的所有 jQuery 数据。
+  	当以后要将删除的元素重新插入到 DOM 中时，此方法很有用。
+  */
+  $( "li" ).detach(':first-child');
+  ```
+
+  
+
+* `.remove([selector])`从 DOM 中删除匹配的元素集（和绑定事件和数据）。
+
+  ```javascript
+  /**
+  	selector一个选择器表达式，用于筛选要删除的匹配元素集。
+  	与 .empty() 类似， .remove() 方法从 DOM 中取出元素。
+      如果要删除元素本身以及其中的所有内容，请使用 .remove() 。
+      除了元素本身之外，还会删除与元素关联的所有绑定事件和 jQuery 数据。
+      要删除元素而不删除数据和事件，请改用 .detach() 。
+  */
+  $( "li" ).remove(':first-child');
+  ```
+
+  
+
 * `.empty()`从 DOM 中删除匹配元素集的所有子节点。
+
 * `.unwrap([selector])`从 DOM 中删除匹配元素集的父元素，将匹配的元素保留在其位置。
 
 ##### jQuery 替换DOM
 
-* `replaceAll`()将每个目标元素替换为匹配的元素集。
-* `replaceWith()`将匹配元素集中的每个元素替换为提供的新内容，并返回已删除的元素集。
+* `replaceAll(target)`将每个目标元素替换为匹配的元素集。
+
+  ```javascript
+  //  用h2替换掉h3
+  $( "<h2>New heading</h2>" ).replaceAll( "h3" )
+  ```
+
+* `replaceWith(newContent)`将匹配元素集中的每个元素替换为提供的新内容，并返回已删除的元素集。
+
+  ```javascript
+  // h3将被h2替换掉
+  $( 'h3' ).replaceWith("<h2>New heading</h2>" )
+  ```
+
+  
 
 ##### jQuery操作属性
 
+* `.attr(property, value)`获取匹配元素集中第一个元素的属性值，或为每个匹配的元素设置一个或多个属性。
+* `.prop(property, value)`获取匹配元素集中第一个元素的属性值，或为每个匹配的元素设置一个或多个属性。
+* attr()读取布尔属性值返回实际值，prop()返回false/true
+* removeAtrr(property)删除属性
+* removeProp(property) 方法删除由 `.prop()` 方法设置的属性。
+* .val()获取匹配元素集中第一个元素的当前值，或设置每个匹配元素的值。
