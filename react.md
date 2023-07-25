@@ -78,6 +78,12 @@ npm install prettier eslint-config-prettier eslint-plugin-prettier --save-dev
   ...
   "plugin:prettier/recommended"
 ]
+// 在配置文件中添加react版本
+"settings": {
+    "react": {
+        "version": "detect"
+    }
+}
 ```
 
 ```js
@@ -143,5 +149,39 @@ module.exports = {
 }
 // 设置保存自动格式化，对文件默认格式化方式改成prettier
 // 不生效重启code
+```
+
+#### 选择仓库
+
+* 工作使用公司内部git仓库
+* 正式的开源项目，需要积累star，使用github
+* 个人demo选择国内平台，如coding.net(1132251310@qq.com/china3423542.)
+
+#### husky
+
+* 一个git hook工具
+
+* 再git commit之前执行的自定义的命令
+* 如执行代码风格的检查，避免提交非规范代码
+
+```shell
+npm install husky -D
+
+# Edit package.json > prepare script and run it once:
+npm pkg set scripts.prepare="husky install" # npm v7
+npm run prepare
+# "scripts": {
+#     "prepare": "husky install"
+#  },
+
+# Add a hook:
+npx husky add .husky/pre-commit "npm run lint"
+npx husky add .husky/pre-commit "npm run format"
+git add .husky/pre-commit
+
+# husky/pre-commit文件
+npm run lint
+npm run format
+
 ```
 
