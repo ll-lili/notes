@@ -1,4 +1,6 @@
-### React
+## React
+
+### React项目开发环境
 
 #### 组件化
 
@@ -199,5 +201,133 @@ echo "module.exports = {extends: ['@commitlint/config-conventional']}" > commitl
 
 # Add hook
 npx husky add .husky/commit-msg  'npx --no -- commitlint --edit ${1}'
+```
+
+### JSX 语法和组件
+
+#### JSX标签和属性
+
+* 区分大小写，小写就是html标签，首字母大写就是自定义组件
+* 标签必须闭合
+* jsx代码片段必须有一个根节点（或者Fragment，<></>）
+* 属性 class改为className
+* style要写成js对象（不能是string）而且key用驼峰的写法
+* for改为htmlFor
+* {}模板语法：写js表达式, 函数， 变量，注释
+* 属性渲染变量： 属性={变量}
+* 添加事件渲染函数：onClick={handleClick}
+
+```jsx
+const html = (
+    const handleClick = () => {
+    	console.log('click')
+	}
+	
+	<>
+    	<a style={{color: 'red', textdecoration: 'none'}}>hello</a>
+		{/* 注释 */}
+   		<div className="container">
+    		<label htmlFor="user">用户名</label>
+    		<input id="user" />
+        	<button onClick={handleClick}>点击</button>
+    	</div>
+    </>
+)
+
+```
+
+#### 事件
+
+* 使用onXxx的形式，如：onClick
+* 必须传入一个函数（是fn,非fn()）
+
+```tsx
+import React from 'react'
+import type { MouseEvent } from 'react'
+import logo from './logo.svg'
+import './App.css'
+
+function App() {
+  const fn = (event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+    console.log('click')
+  }
+  const fn2 = (event: MouseEvent<HTMLButtonElement>, name: string) => {
+    event.preventDefault()
+    console.log('click', name)
+  }
+  return (
+    <div className="App">
+      <header className="App-header">
+        <img src={logo} className="App-logo" alt="logo" />
+        <p>
+          Edit <code>src/App.tsx</code> and save to reload.
+        </p>
+        <p>hello</p>
+        <a
+          className="App-link"
+          href="https://reactjs.org"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Learn React
+        </a>
+        <div>
+          <button onClick={fn}>点击</button>
+           <button onClick={(event) => fn2(event, 'll')}>点击2</button>
+        </div>
+      </header>
+    </div>
+  )
+}
+
+export default App
+
+```
+
+#### 条件判断
+
+* 使用 &&
+* 使用三元表达式
+* 使用函数封装
+
+```jsx
+const flag = true
+function Hello () {
+    if (flag) {
+        return <p>hello</p>
+    } else {
+        <p>你好</p>
+    }
+}
+const html = (
+	<div>
+        { flag && <p>hello</p>}
+        { flag ? <p>hello</p> : <p>你好</p>}
+        <Hello></Hello> {/* 自定义组件 */}
+    </div>
+)
+```
+
+#### 循环
+
+* 使用数组map方法
+* 每个item元素需要key属性
+
+```jsx
+const list = [
+    {username: 'zhangsan'},
+    {username: 'lisi'}
+]
+const html = (
+	<ul>
+        {
+            list.map((user, index) => {
+                const { username } = user
+                return <li key={username}>{ username } { index }</li>
+            })
+        }
+    </ul>
+)
 ```
 
