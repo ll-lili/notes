@@ -185,3 +185,19 @@ npm run format
 
 ```
 
+#### commitlint
+
+```shell
+# Install commitlint cli and conventional config
+npm install --save-dev @commitlint/{config-conventional,cli}
+# For Windows:
+npm install --save-dev @commitlint/config-conventional @commitlint/cli
+
+# Configure commitlint to use conventional config
+# 注意文件字符集是否是utf-8
+echo "module.exports = {extends: ['@commitlint/config-conventional']}" > commitlint.config.js
+
+# Add hook
+npx husky add .husky/commit-msg  'npx --no -- commitlint --edit ${1}'
+```
+
