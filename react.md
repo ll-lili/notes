@@ -203,7 +203,7 @@ echo "module.exports = {extends: ['@commitlint/config-conventional']}" > commitl
 npx husky add .husky/commit-msg  'npx --no -- commitlint --edit ${1}'
 ```
 
-### JSX 语法和组件
+### JSX 语法
 
 #### JSX标签和属性
 
@@ -312,7 +312,7 @@ const html = (
 #### 循环
 
 * 使用数组map方法
-* 每个item元素需要key属性
+* 每个item元素需要key属性,同级别不能重复
 
 ```jsx
 const list = [
@@ -329,5 +329,112 @@ const html = (
         }
     </ul>
 )
+```
+
+### 组件
+
+* 组件就是一个ui的片段
+* 拥有独立的逻辑和显示
+* 组件可大可小可嵌套
+* 组件拆分，利于代码维护，和多人协作开发
+* 可封装公共组件（或第三方组件）复用代码，提高开发效率
+
+### props
+
+- 要传递 props，请将它们添加到 JSX，就像使用 HTML 属性一样。
+- 要读取 props，请使用 `function Avatar({ person, size })` 解构语法。
+- 你可以指定一个默认值，如 `size = 100`，用于缺少值或值为 `undefined` 的 props 。
+- 你可以使用 `<Avatar {...props} />` JSX 展开语法转发所有 props，但不要过度使用它！
+- 像 `<Card><Avatar /></Card>` 这样的嵌套 JSX，将被视为 `Card` 组件的 `children` prop。
+- Props 是只读的时间快照：每次渲染都会收到新版本的 props。
+- 你不能改变 props。当你需要交互性时，你可以设置 state。
+
+### React Hooks
+
+#### useState
+
+* props 父组件传递过来的信息
+* state 组件内部的信息，不对外
+* state 变化，触发组件更新，重新渲染rerender页面
+* `setState`异步更新
+* state不用于JSX中显示，那就不要用setState管理，用useRef
+* `setState`可能会被合并, 通过函数更新不会被合并
+* **不可变数据**，不能直接修改state,通过`setState`传入新的值
+
+```jsx
+import React, { useState } from 'react'
+function App () {
+    const [count, setCount] = useState(0)
+    const add = () => {
+        setCount(count + 1) // 异步更新，无法直接拿到最新值
+        // setCount(count => count + 1) // 函数形式
+        console.log(count) // 更新前的值
+    }
+    
+    const [userInfo, setUserInfo] = useState({
+        username: 'll',
+        age: 22
+    })
+    const handleChange = () => {
+        // 不可变数据
+        // 错误的写法：userInfo.age = 23
+        setUserInfo({
+            ...userInfo,
+            age: 23
+        })
+    }
+    return (
+    	<>
+        	<button onClick={ add }>add: { count }</button>
+        </>
+    )
+}
+```
+
+##### immer
+
+* 改变state不可变数据
+
+```jsx
+/**
+	安装immer: npm install immer --save
+*/
+import produce from 'immer'
+
+// ...
+const [userInfo, setUserInfo] = useState({
+        username: 'll',
+        age: 22
+})
+function handleChange () {
+    setUserInfo(produce( draft => {
+        draft.age = 20
+    }))
+}
+//...
+```
+
+#### useEffect
+
+##### 副作用
+
+* 当组件渲染完成时（时机），触发一个行为，如：加载一个网络请求
+* 当某个state更新时（时机），触发一个行为，如：加载一个网络请求
+* 使用useEffect实现
+
+```jsx
+import { useEffect } from 'react'
+// ...
+const App = () => {
+    useEffect(() => {
+        console.log('当组件渲染完成时')
+    }, []) // []是依赖
+    return(
+        <>
+            <div>app</div>
+        </>
+    )
+}
+// ...
 ```
 
