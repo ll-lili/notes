@@ -647,17 +647,39 @@ npm install @types/styled-components --save
 ```
 
 ```tsx
-import styles from 'styled-components'
+import styled, { css } from 'styled-components'
+
+type ButtonPropsType = {
+    primary?: boolean
+}
 
 const BUTTON = styled.button`
 	color: red;
 	font-size: 24
+	${ (props: ButtonPropsType) => props.primary && css`
+		background: red;
+	`}
 `
+const Container = styled.div`
+	text-align: center;
+`
+// styled.div`` 是函数调用，实参返回一个数组
 const html =(
 	<>
 		<div>title</div>
    		<p>item</p>
+    	<Container>
+            <Button>按钮</Button>
+        	<Button primary={true}>按钮2</Button>
+        </Container>
     </>
 )
 ```
 
+##### styled-jsx
+
+* 不适合ts(需要配置)
+
+##### Emotion
+
+* 不适合ts(需要配置)
