@@ -351,6 +351,9 @@ const html = (
 
 ### React Hooks
 
+* 只能在组件内调用hook,或者在其他hook中调用
+* 必须保证在组件顶层调用，不能再if和for中调用
+
 #### useState
 
 * props 父组件传递过来的信息
@@ -428,7 +431,15 @@ import { useEffect } from 'react'
 const App = () => {
     useEffect(() => {
         console.log('当组件渲染完成时')
-    }, []) // []是依赖
+    }, []) // []是依赖的state, 有无依赖初次渲染都会触发
+    
+    useEffect(() => {
+        console.log('当组件渲染完成时')
+        return () => {
+            console.log('当组件销毁时')
+        }
+    }, []) 
+    // 生命周期：创建 更新（state变化） 销毁
     return(
         <>
             <div>app</div>
@@ -436,5 +447,217 @@ const App = () => {
     )
 }
 // ...
+```
+
+##### useEffect执行两次
+
+* React18开始，useEffect在**开发环境下**会执行两次
+* 模拟组件创建、销毁、再创建的完整流程，及早暴露问题
+* 生产环境下会执行一次
+
+#### useRef
+
+* 一般用于操作DOM
+* 也可以传入普通js变量，但更新不会触发rerender
+
+```tsx
+import React, { FC, useRef } from 'react'
+
+const Demo:FC = () => {
+    const inputRef = useRef<HTMLInputElement>(null) // 传入泛型
+    const selectInput = () => {
+        const inputElem = inputRef.current // dom节点
+        if (inputElem) {
+            inputElem.select()
+        }
+    }
+    return (
+    	<>
+        	<input onClick={ selectInput } defaultValue="默认值" />
+        </>
+    )
+}
+```
+
+#### useMemo
+
+* 函数组件，每次state更新都会重新执行函数
+* useMemo可以缓存数据，不用每次执行函数都重新生成
+* 可以用计算量较大的场景，缓存提高性能
+
+```tsx
+import React, { FC, useState, useMemo } from 'react'
+
+const Demo:FC = () => {
+    const [num1, setNum1] = useState(1)
+    const [num2, setNum2] = useState(1)
+    // num1, num1不放生改变，total不会重新计算
+    const total = useMemo(() => num1 + num2, [num1, num1])
+    return (
+    	<>
+        	<p>total</p>
+        </>
+    )
+}
+```
+
+#### useCallback
+
+* 和useMemo作用一样  
+* 专门用于缓存函数
+
+```tsx
+import React, { FC, useCallback } from 'react'
+
+const Demo:FC = () => {
+    const fn1 = () => {
+        console.log('fn1')
+    }
+    // fn2函数被缓存， 重新执行函数组件不会重新生成（根据[]依赖）
+    const fn2 = useCallback(() => {
+        console.log('fn2')
+    }, [])
+    return (
+    	<>
+        	<p>total</p>
+        </>
+    )
+}
+```
+
+#### 自定义Hook
+
+* React组件公共逻辑的抽离和复用
+
+```ts
+// hooks/useTitle.ts
+// 设置标题
+import { useEffect } from 'react'
+
+function useTitle (title: string) {
+    useEffect(() => {
+        document.title = title
+    }, [])
+}
+export default useTitle
+
+// 获取鼠标位置
+import { useEffect, useState } from 'react'
+
+function useMouseMove() {
+  const [x, setX] = useState(0)
+  const [y, setY] = useState(0)
+  useEffect(() => {
+    document.addEventListener('mousemove', handleMouseMove)
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      console.log('移除mousemove')
+    }
+  }, [])
+  const handleMouseMove = (e: MouseEvent) => {
+    setX(e.pageX)
+    setY(e.pageY)
+  }
+  return { x, y }
+}
+export default useMouseMove
+
+// hook异步加载数据
+// 其他组件中直接引入使用
+```
+
+#### 第三方Hooks
+
+* `ahooks`国内
+* react-use国外
+
+### 闭包陷阱（`closureTrap`）
+
+* 当异步函数获取state时，可能不是当前最新的state
+* 使用useRef解决
+
+```tsx
+import React, { FC, useState, useRef, useEffect } from 'react'
+
+const Demo:FC = () => {
+    const [count, setCount] = useState(0)
+    const countRef = useRef(0)
+    useEffect(() => {
+        countRef.current = count
+    }, [count])
+    const add = () => {
+        setCount(count + 1)
+    }
+    const alertFn = () => {
+        setTimeOut(() => {
+            // alert(count) // 值类型
+            alert(countRef.current) // 引用类型
+        }, 3000)
+    }
+    return (
+    	<>
+        	<p>{count}</p>
+        	<button onClick={add}>add</button>
+       		<button onClick={alertFn}>alert</button>
+        </>
+    )
+}
+```
+
+### React 中使用 `CSS `样式
+
+#### 动态条件判断className
+
+* 第三方库`classnames`、`clsx`
+
+#### `CSS Module`
+
+* 每个`css`文件都当做单独的模块。命名`xxx.module.css`
+* 为每个className增加后缀名，不让他们重复
+* `create-react-app`原生支持`css module`
+
+```tsx
+import styles from './xx.module.css'
+
+const html =(
+	<>
+		<div className={styles.title}>title</div>
+   		<p className={styles['list-item']}>item</p>
+    </>
+)
+```
+
+#### 使用sass
+
+* npm install sass --save
+
+* `CRA`原生支持Sass Module,后缀名.scss即可
+
+#### `CSS-in-JS`
+
+* 一种解决方案（而非工具名称），有好几个工具
+* 再`JS`中写`CSS`，带来极大的灵活性
+* 它和内联style完全不一样，也不会有内联style的问题
+
+##### styled-components
+
+```shell
+npm install --save styled-components
+npm install @types/styled-components --save
+```
+
+```tsx
+import styles from 'styled-components'
+
+const BUTTON = styled.button`
+	color: red;
+	font-size: 24
+`
+const html =(
+	<>
+		<div>title</div>
+   		<p>item</p>
+    </>
+)
 ```
 
