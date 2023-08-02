@@ -683,3 +683,117 @@ const html =(
 ##### Emotion
 
 * 不适合ts(需要配置)
+
+### React-router
+
+#### react-router-dom
+
+```shell
+npm install react-router-dom -save
+```
+
+```tsx
+// router/index.tsx
+import React from 'react'
+import { createBrowserRouter } from 'react-router-dom'
+
+import MainLayout from '../layouts/MainLayout'
+import ManageLayout from '../layouts/ManageLayout'
+
+import Home from '../pages/Home'
+
+const router = createBrowserRouter([
+    {
+        path: '/'
+        element: <MainLayout />
+        children: [
+        	{
+                path: '/',
+                element: <Home/>
+            },
+    		{
+                path: '/login',
+                element: <Login/>
+            },
+    		{
+                path: '/register',
+                element: <Legister/>
+            },
+    		{
+                path: '*',
+                element: <NotFound/>
+            }
+        ]
+    }
+])
+
+export default router
+```
+
+```tsx
+// App.tsx
+import React from 'react'
+import { RouterProvider } from 'react-router-dom'
+import routerConfig'./router'
+const App = () => {
+    return <RouterProvider router={routerConfig}></RouterProvider>
+}
+export default App
+```
+
+
+
+```tsx
+// MainLayout
+import React, { FC } from 'react'
+import { Outlet } from 'react-router-dom'
+// Outlet相当于vue中slot
+
+const MainLayout: FC = () => {
+    return (
+        <>
+            <div>main layout header</div>
+            <div>
+        		<Outlet/>	
+        	</div>
+            <div>main layout footer</div>
+    	</>
+    )
+}
+export default MainLaypit
+```
+
+```tsx
+// 路由跳转
+import React, { FC } from 'react'
+import { useNavigate, Link, useParams, useSearchParams } from 'react-router-dom'
+
+const Home: FC = () => {
+    const nav = useNavigate() 
+    // 获取动态路由参数
+    const { id = '' } = useParams() 
+    console.log(id)
+    // 获取路由参数
+    const [searchParams] = useSearchParams()
+ 	 console.log(searchParams.get('b'))
+    const handleLogincLick = () => {
+        // nav('/login?b=20')
+        nav({
+          pathname: '/login',
+          search: 'b=20'
+        })
+        // nav(-1)
+        
+    }
+    return (
+        <div>
+            <h1>home</h1>
+            <div>
+                <button onClick={handleLogincLick}>登录</button>
+                <Link to="/register?a=10">注册</Link>
+            </div>
+        </div>
+    )
+}
+```
+
