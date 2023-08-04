@@ -692,17 +692,19 @@ const html =(
 npm install react-router-dom -save
 ```
 
+#### router配置
+
 ```tsx
-// router/index.tsx
+// router/index.tsx 
+// router配置
 import React from 'react'
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, createHashRouter} from 'react-router-dom'
 
 import MainLayout from '../layouts/MainLayout'
 import ManageLayout from '../layouts/ManageLayout'
 
 import Home from '../pages/Home'
-
-const router = createBrowserRouter([
+const routes = [
     {
         path: '/'
         element: <MainLayout />
@@ -725,13 +727,26 @@ const router = createBrowserRouter([
             }
         ]
     }
-])
+]
+const router = createBrowserRouter(routes)
 
 export default router
+
+// 路由表组件写法
+import { createRoutesFromElements, Route} from 'react-router-dom'
+const routes = createRoutesFromElements(
+	<Route> path="/" element={<MainLayout/>}>
+        <Route path="/" element={<Home />}></Route>
+        <Route path="/login" element={<Login />}></Route>
+    </Route>
+)
 ```
+
+#### router应用
 
 ```tsx
 // App.tsx
+// router应用
 import React from 'react'
 import { RouterProvider } from 'react-router-dom'
 import routerConfig'./router'
@@ -741,10 +756,11 @@ const App = () => {
 export default App
 ```
 
-
+#### 二级路由
 
 ```tsx
 // MainLayout
+// 二级路由
 import React, { FC } from 'react'
 import { Outlet } from 'react-router-dom'
 // Outlet相当于vue中slot
@@ -763,19 +779,27 @@ const MainLayout: FC = () => {
 export default MainLaypit
 ```
 
+#### 路由跳转，参数处理
+
+
+
 ```tsx
-// 路由跳转
+// 路由跳转，参数处理
 import React, { FC } from 'react'
-import { useNavigate, Link, useParams, useSearchParams } from 'react-router-dom'
+import { useNavigate, Link, NavLink, useParams, useSearchParams, useLocation } from 'react-router-dom'
 
 const Home: FC = () => {
+    // 编程式路由
     const nav = useNavigate() 
-    // 获取动态路由参数
+    // 获取动态路由参数， { path: "/edit/:id"}
     const { id = '' } = useParams() 
     console.log(id)
     // 获取路由参数
-    const [searchParams] = useSearchParams()
- 	 console.log(searchParams.get('b'))
+    const [searchParams， setSearchParams] = useSearchParams()
+ 	console.log(searchParams.get('b'))
+    // setSearchParams({})
+    // 获取pathname
+    const { pathname } = useLocation
     const handleLogincLick = () => {
         // nav('/login?b=20')
         nav({
@@ -791,9 +815,67 @@ const Home: FC = () => {
             <div>
                 <button onClick={handleLogincLick}>登录</button>
                 <Link to="/register?a=10">注册</Link>
+                {/* 
+                	带样式的声明式路由<NavLink>
+                	默认样式.active{}
+                	自定义样式.active2{}
+                */}
+                <NavLink className={(isActive) => isActive? "active2" : ''} to="/register?a=10">注册</NavLink>
             </div>
         </div>
     )
 }
+```
+
+####  默认路由，重定向，404
+
+* 默认路由
+
+* 组件重定向
+
+* 全局404：errorElement
+
+  ```tsx
+  const routes = [
+      {
+          path: '/'
+          element: <MainLayout />,
+          errorElement: <div>404</div>, // 全局
+          children: [
+          	{
+                  index: true,
+                  element: <div>默认内容</div>
+              },
+      		{
+                  path: '',
+                  element: <Navigate to="/" />
+              }
+          ]
+      }
+  ]
+  ```
+
+#### 路由loader函数与redirect方法
+
+* loader函数进行路由前触发，配合redirect做权限拦截
+* useLoaderData()获取loader函数返回的数据
+
+```tsx
+const routes = [
+    {
+        path: 'list',
+        element: <List />,
+        loader () { // 同步
+            console.log('list')
+        }
+     }，
+    {
+     loader: async () => {
+         await new Promise((resolve, reject) => {
+             setTimeOut(()=> {})
+         })
+     }
+    }
+]
 ```
 
