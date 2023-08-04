@@ -345,7 +345,7 @@ const html = (
 - 要读取 props，请使用 `function Avatar({ person, size })` 解构语法。
 - 你可以指定一个默认值，如 `size = 100`，用于缺少值或值为 `undefined` 的 props 。
 - 你可以使用 `<Avatar {...props} />` JSX 展开语法转发所有 props，但不要过度使用它！
-- 像 `<Card><Avatar /></Card>` 这样的嵌套 JSX，将被视为 `Card` 组件的 `children` prop。
+- 像 `<Card><Avatar /></Card>` 这样的嵌套 JSX，将被视为 `Card` 组件的 `BeforeEach` prop。
 - Props 是只读的时间快照：每次渲染都会收到新版本的 props。
 - 你不能改变 props。当你需要交互性时，你可以设置 state。
 
@@ -610,6 +610,23 @@ const Demo:FC = () => {
 
 * 第三方库`classnames`、`clsx`
 
+```tsx
+classNames('foo', 'bar'); // => 'foo bar'
+classNames('foo', { bar: true }); // => 'foo bar'
+classNames({ 'foo-bar': true }); // => 'foo-bar'
+classNames({ 'foo-bar': false }); // => ''
+classNames({ foo: true }, { bar: true }); // => 'foo bar'
+classNames({ foo: true, bar: true }); // => 'foo bar'
+
+// lots of arguments of various types
+classNames('foo', { bar: true, duck: false }, 'baz', { quux: true }); // => 'foo bar baz quux'
+
+// other falsy values are just ignored
+classNames(null, false, 'bar', undefined, 0, 1, { baz: null }, ''); // => 'bar 1'
+```
+
+
+
 #### `CSS Module`
 
 * 每个`css`文件都当做单独的模块。命名`xxx.module.css`
@@ -861,6 +878,7 @@ const Home: FC = () => {
 * useLoaderData()获取loader函数返回的数据
 
 ```tsx
+import { redirect } from 'react-router-dom'
 const routes = [
     {
         path: 'list',
@@ -870,12 +888,54 @@ const routes = [
         }
      }，
     {
-     loader: async () => {
-         await new Promise((resolve, reject) => {
-             setTimeOut(()=> {})
-         })
-     }
+    
+        path: 'list',
+        element: <List />,
+        loader: async () => { // 异步
+             const res = await new Promise((resolve, reject) => {
+                 setTimeOut(()=> { resolve(1)})
+             })
+            if (res) {
+                return redirect('/login') // 重定向
+            } else {
+                return res // 返回数据
+            }
+         }
     }
 ]
+
+// List.tsx 页面
+import { useLoaderData } from 'react-router-dom'
+ const List = () => {
+     const data = useLoaderData()
+     console.log(data) // list123
+     return <div>list</div>
+ }
+```
+
+#### 自定义全局守卫与自定义元信息
+
+- 自定义全局组件：包裹根组件
+- 自定义元信息：meta
+- 组件中获取meta信息：matchRoutes 与useLocation
+
+```tsx
+import React, { FC } from 'react'
+import { useLocation, matchRoutes } from 'react-router-dom'
+import { routes } from '../router'
+
+type PropsType = {
+  children: React.ReactNode
+}
+const BeforeEach: FC<PropsType> = (props) => {
+  const location = useLocation()
+  const matchs = matchRoutes(routes, location)
+  console.log('beforeEach')
+  console.log(matchs)
+  return <>{props.children}</>
+}
+
+export default BeforeEach
+
 ```
 
