@@ -939,3 +939,214 @@ export default BeforeEach
 
 ```
 
+### 表单组件
+
+- 受控组件：值同步到state，使用value属性
+- 非受控组件：值不同步到state，使用defaultValue属性
+
+```tsx
+import React , {useState, ChangeEvent} from 'react'
+
+const Demo: React.FC = () => {
+    const [value, setValue] = useState<string>('hello')
+    const handleChange = (e: ChangeEvent<HTMLInputElemnt>) => {
+        setValue(e.target.value)
+    }
+	return <>
+    	<input value={value} onChange={handleChange} />
+    </>
+}
+```
+
+
+
+### React与TS
+
+#### props限制
+
+- 组件参数限制类型，或者FC泛型限制类型
+
+```tsx
+// 组件参数限制类型
+type DemoType = {
+    message: string
+}
+function Demo (props: DemoType) {
+    return <div>hello</div>
+}
+
+// FC泛型限制类型
+import type { FC } from 'react'
+type DemoType = {
+    message: string
+}
+const Demo: FC<DemoType> = (props) => {
+    return <div>hello</div>
+}
+
+export default Demo
+```
+
+#### children与event限制
+
+- children: React.ReactNode
+- event: React.MouseEvent<HTMLButtonElement>(或者ChangeEvent)
+
+```tsx
+import React from 'react'
+import type { FC, ReactNode } from 'react'
+type DemoType = {
+    message: string,
+    children: ReactNode
+}
+const Demo: FC<DemoType> = (props) => {
+    const handleBtnClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+	 //...
+    }
+    return (
+        <div>
+            <p>hello</p>
+            <button onClick={handleBtnClick}>按钮</button>
+        </div>
+    )
+}
+
+export default Demo
+```
+
+#### style与component限制
+
+- style: React.CSSProperties
+- component: React.ComponentType
+
+```tsx
+import React from 'react'
+import type { FC, ReactNode } from 'react'
+type DemoType = {
+    message: string,
+    children: ReactNode,
+    style: React.CSSProperties,
+    component: React.ComponentType // (可反泛型传参数类型<>)
+}
+const Demo: FC<DemoType> = (props) => {
+    return (
+        <div>
+            <p>hello</p>
+        </div>
+    )
+}
+
+export default Demo
+```
+
+#### use函数限制
+
+- useState(): 联合类型、对象字面类类型
+- useEffect(): 自动类型推断
+- useRef(): 泛型标签类型
+
+```tsx
+import React from 'react'
+import type { FC } from 'react'
+type DemoType = {
+    message: string
+}
+const Demo: FC<DemoType> = (props) => {
+    const [count, setCount] = useState<string | number >(0)
+    const [list, setList] = useState<string[]>([])
+    const [info, setInfo] = useState<{username: string} | null>(null)
+    // const [info, setInfo] = useState<{username: string}>({} as {username: string})
+    
+    const myRef = useRef<HTMLButtonElemnt>(null)
+    useEffect(() => {
+        console.log(myRef?.current.innerHTML) // 可选链（类型保护）
+        console.log(myRef.current!.innerHTML) // 非空断言（慎用）
+        return () => {}
+    }, [])
+    return (
+        <div>
+            <p>hello</p>
+            <div>{info?.username}</div>
+            <button ref={myRef}>按钮</button>
+        </div>
+    )
+}
+
+export default Demo
+```
+
+#### 类组件类型限制
+
+- React.Component<Props, state>
+
+```tsx
+import React, { Component } from 'react'
+type DemoState = {
+    username: string
+}
+type DemoProps = {
+    count: number
+}
+class Demo extends Component<DemoProps, DemoState> {
+    state = {
+        username: 'll'
+    }
+    render () {
+		return <div>hello {this.state.username}</div>
+    }
+}
+```
+
+#### 路由TS
+
+- RouteObject内置类型，限制路由表
+- React.createElement()进行组件编写
+- 扩展meta元信息
+
+```tsx
+// router/index.tsx
+import { createBrowserRouter } from 'react-router-dom'
+import type { RouteObject } from 'react-router-dom'
+
+declare module 'react-router' {
+  interface IndexRouteObject {
+    meta?: { title: string }
+  }
+  interface NonIndexRouteObject {
+    meta?: { title: string }
+  }
+}
+const routes: RouteObject[] = [
+  {
+    path: '/',
+    element:
+      <BeforeEach>
+        <MainLayout />
+      </BeforeEach>
+    ),
+    errorElement: <NotFound />,
+    meta: {
+      title: '/'
+    },
+    children: [
+      {
+        path: '/',
+        element: <Home />,
+        meta: {
+          title: '首页'
+        }
+      },
+      {
+        path: '/login',
+        element: <Login />,
+        meta: {
+          title: '登录'
+        }
+      }
+    ]
+  }
+]
+const router = createBrowserRouter(routes)
+export default router
+```
+
