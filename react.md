@@ -405,8 +405,8 @@ import {TemeContext} from './Demo'
 const ThemeButton: FC = ()=> {
     const theme = useContext(TemeContext)
     const style = {
-        color: style.fore,
-        background: style.bg
+        color: theme.fore,
+        background: theme.bg
     }
     return <button style={style}>ThemeButton</button>
 }
@@ -1080,7 +1080,7 @@ export type StateType = {
     count: number
 }
 export default configureStore({
-    refucer: {
+    reducer: {
         count: countReducer
     }
 })
@@ -1121,7 +1121,7 @@ const rodoListSlice = createSilce({
     name: 'todoList',
     initialState: INIT_STATE,
     reducers: {
-    	addTodo (state: TodoItemType[],action: PayloadAction<TodoItemType>) {
+    	addTodo (state: TodoItemType[], action: PayloadAction<TodoItemType>) {
             return [
                 action.payload,
                 ...state
@@ -1168,6 +1168,8 @@ const Count: FC = () => {
     )
 }
 ```
+
+#### Redux单项数据流
 
 
 
