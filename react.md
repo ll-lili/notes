@@ -349,6 +349,71 @@ const html = (
 - Props 是只读的时间快照：每次渲染都会收到新版本的 props。
 - 你不能改变 props。当你需要交互性时，你可以设置 state。
 
+### Context
+
+- 可跨层级传递，而不像props层层传递
+- 类似于Vue的provide/inject
+
+```tsx
+// Demo.tsx
+import React, { FC, createContext, useState } from 'react'
+import Toolbar from './Toolbar'
+const temes = {
+    light: {
+        fore: '#000',
+        bg: '#eee'
+    },
+    dark: {
+        fore:  '#fff',
+        bg: '#222'
+    }
+    
+}
+// 定义Context
+export conet TemeContext = createContext(themes.light)
+
+const Deom: FC = () => {
+    const [theme, setTeme] = useState(themes.light)
+    const toDark = () => {
+        setTeme(themes.dark)
+    }
+    return (
+    	<TemeContext.Provider value={theme}>
+            <div>
+                <span> Conttext theme</span>
+                <button onClick={toDark}>dark</button>
+            </div>
+            <Toolbar/>
+        </TemeContext.Provider>
+    )
+}
+
+// Toolbar.tsx
+import React, { FC } from 'react'
+import ThemeButton from './ThemeButton'
+
+const Toolbar: FC = ()=> {
+	return <>
+    	<div>Toolbar</div>
+    	<ThemeButton/>
+    </>
+}
+
+// ThemeButton.tsx
+import React, { FC, useContext } from 'react'
+import {TemeContext} from './Demo'
+const ThemeButton: FC = ()=> {
+    const theme = useContext(TemeContext)
+    const style = {
+        color: style.fore,
+        background: style.bg
+    }
+    return <button style={style}>ThemeButton</button>
+}
+```
+
+
+
 ### React Hooks
 
 * 只能在组件内调用hook,或者在其他hook中调用
@@ -524,6 +589,50 @@ const Demo:FC = () => {
     )
 }
 ```
+
+#### useReducer
+
+- useState的替代方案
+- 数据结构简单时用useState,复杂是用useReducer
+- 简化版的redux
+
+```tsx
+// CountReducer.tsx
+import React, { FC, useReducer } from 'react'
+
+type StateType = {
+    count: number
+}
+type AcionType = {
+    type: string
+}
+const initialState: StateType = { count: 100 }
+
+// 根据传入的action 返回新的 state(不可变数据）
+function reducer (state: StateType, action: ActionType) {
+    switch(action.type) {
+        case 'increment':
+            retutrn {count: state.count + 1}
+        case 'decrement':
+            retutrn {count: state.count - 1}
+        default:
+            thorw new Error()
+    }
+}
+
+const CountReducer: FC = () => {
+    const [state, dispatch] = useReducer(reducer, initialState)
+    return (
+    	<>
+        	<div>Count: {state.count}</div>
+        	<button onClick={() => dispatch({type: 'increment'})}>+<button>
+            <button onClick={() => dispatch({type: 'decrement'})}>-button>
+        </>
+    )
+}
+```
+
+
 
 #### 自定义Hook
 
@@ -816,7 +925,7 @@ const Home: FC = () => {
  	console.log(searchParams.get('b'))
     // setSearchParams({})
     // 获取pathname
-    const { pathname } = useLocation
+    const { pathname } = useLocation()
     const handleLogincLick = () => {
         // nav('/login?b=20')
         nav({
@@ -955,6 +1064,108 @@ const Demo: React.FC = () => {
 	return <>
     	<input value={value} onChange={handleChange} />
     </>
+}
+```
+
+### 状态管理Redux
+
+```tsx
+/**
+* src/store/index.ts
+* npm install @reduxjs/toolkit react-redux
+*/
+import { configureStore } from '@reduxjs/toolkit'
+import countReducer from './count'
+export type StateType = {
+    count: number
+}
+export default configureStore({
+    refucer: {
+        count: countReducer
+    }
+})
+
+
+/**
+* src/store/count.ts
+*/
+import { createSlice } from '@reduxjs/toolokit'
+
+const INIT_STATE: number = 100
+export const countSlice = createSlice({
+    name: 'count', // 模块名字
+    initialState: INIT_STATE,
+    reducers: {
+        increase (state: number) {
+			return state + 1
+        },
+        decrease (state: number) {
+            return state -1 // 返回新的state(不可变数据)
+        }
+    }
+})
+
+export const {increase, decrease} = countSilce.actions
+export default countSilce.reducer
+/**
+* src/store/todoList.ts
+*/
+import { createSlice, PayloadAction} from '@reduxjs/tookit'
+export const TodoItemType = {
+    id: string
+    title: string
+}
+const INIT_STATE: TodoItemType[] = []
+
+const rodoListSlice = createSilce({
+    name: 'todoList',
+    initialState: INIT_STATE,
+    reducers: {
+    	addTodo (state: TodoItemType[],action: PayloadAction<TodoItemType>) {
+            return [
+                action.payload,
+                ...state
+            ]
+        }
+    
+	}
+})
+
+/**
+* src/index.tsx
+*/
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+
+import App from './App'
+import { Provider } from 'react-redux'
+import store from './store/index.ts'
+
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
+root.render(
+  <React.StrictMode>
+    <Provider store={store}>
+   	 <App />
+    </Provider>
+  </React.StrictMode>
+)
+
+/**
+* src/Count.tsx
+*/
+import React, { FC } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import { increase, decrease } from './store/count'
+import type {StateType} from '/store/index'
+
+const Count: FC = () => {
+    const count = useSelector(state<StateType> => state.count)
+    const dispatch = useDispatch()
+    return (
+        <div> { count }</div>
+        <button onClick={() => dispatch(increase())}>+</button>
+        <button onClick={() => dispatch(decrease())}>-</button>
+    )
 }
 ```
 
