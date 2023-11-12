@@ -344,6 +344,7 @@ p = p ^ Permussion.Read
 - 在函数名之后`<类型>`
 
 ```ts
+// 取出数组的前几项
 function take<T>(arr: T[], n: number): T[] {
     if (n>= arr.length) {
         return arr
@@ -355,5 +356,201 @@ function take<T>(arr: T[], n: number): T[] {
     return newArr
 }
 take<number>([1, 22, 135], 2)
+```
+
+#### 在类型别名、接口、类中使用泛型
+
+- 直接在名称之后`<类型>`
+
+```ts
+type CallbackType<T> = (item: T, i: number) => boolean
+
+function filter<T>(arr:T[], callback:CallbackType<T>) {
+  const newArr: T[] = []
+  arr.forEach((item, i) => {
+    if (callback(item, i)){
+			newArr.push(item)
+    }
+  })
+  return newArr
+}
+
+const list = [1, 2, 3, 4]
+const res = filter(list, (item) => item > 3)
+console.log(res) // [ 4 ]
+```
+
+```ts
+// ...dd
+class ArrayHelper {
+  take<T>(arr: T[], n: nomber): T[] {
+		if (n>= arr.length) {
+        return arr
+    }
+    const newArr: T[] = []
+    for (let i =0; i < n; n++) {
+        newArr.push(arr[i])
+    }
+    return newArr
+  }
+}
+```
+
+#### 泛型约束
+
+- 泛型约束用于限制泛型的取值
+
+```ts
+function nameToUpperCase<T extends {name: string}>(obj: T):T {
+  obj.name = obj.name.split(' ').map(str => str[0].toUpperCase() + str.substring(1)).join(' ')
+  return obj
+}
+```
+
+#### 多泛型
+
+```ts
+function mixinArray<T, K> (arr1: T[], arr2:K[]): (T | K) [] {
+  if (arr1.length !== arr2.length) {
+    throw new Error('数组长度不一致')
+  }
+  const result: (T | K) [] = []
+  for (let i = 0; i < arr1.length; i++) {
+    result.push(arr1[i])
+    result.push(arr2[i])
+  }
+  return  result
+}
+```
+
+
+
+### 接口和类型兼容性
+
+#### TS中的接口
+
+- 用于约束类、对象、函数的契约（标准）
+- 接口不出现在编译结果中
+
+##### 接口约束对象
+
+```ts
+interface User {
+  name: string
+  age: number
+  // sayHello: () => void
+  sayHi(): void
+}
+const u: User = {
+  name: 'LL',
+  age: 22
+}
+```
+
+##### 接口约束函数
+
+```ts
+// type Condition = (n: number) => boolean
+//type Condition = {
+//  (n: number): boolean
+//}
+interface Condition {
+  (n: number): boolean
+}
+function sum (numbers: number[], callback: Condition) {
+	let res = 0
+  numbers.forEach(item => {
+		if (callback(item)) {
+			res += item
+    }
+  })
+  return res
+}
+const list = [1, 2, 3, 4, 5, 6]
+const r = sum(list, (n) => n > 3)
+console.log(r)
+```
+
+##### 接口可以继承
+
+- 子接口不能覆盖父接口的成员
+- 交叉类型会把相同成员的类型进行交叉
+
+```ts
+interface A {
+  a: string
+}
+interface B extends A {
+  b: number
+}
+
+const o: B ={
+	a: 'hello',
+  b: 1
+}
+/**
+* 使用类型可以实现类似接口继承效果
+* 通过`&`:交叉类型
+*/
+type C = {
+  c: string
+}
+type D = {
+  d: number
+} & C
+```
+
+
+
+### TS中的类
+
+- 属性： 使用属性列表来描述类中的属性
+- 属性的初始化检查: tsconfig.json: 更加严格的属性初始化配置`"strictPropertyInitialization": true`
+- 属性可以修饰为可选
+- 属性可以修饰为只读
+- 访问修饰符：可以控制类中的某个成员的访问权限
+  - public：默认的访问修饰符，公开的所有代码都可以访问（类的内部和外部）
+  - private：私有的，只有在类的内部可以访问
+  - protected：受保护的..
+- 属性简写：属性通过构造函数参数传递，并且直接赋值该属性`(public username: string)`
+- 访问器（set, get）： 用于控制属性的读取和赋值
+
+```ts
+ /**
+* 属性： 使用属性列表来描述类中的属性
+* 属性的初始化检查: 在tsconfig.json: 更加严格的属性初始化配置"strictPropertyInitialization": true
+*/
+
+class User {
+  readonly id: number
+  pid?: string
+  private publishNum = 3
+  private currPublishNum = 0
+	constructor(public username: string, private _age: number) {
+    this.id = Math.random()
+    this.username = username
+    this.age = age 
+	}
+  set age (value: number) {
+    if (value < 0) {
+			this._age = 0
+    } else if (value > 200) {
+			this._age = 200
+    } else {
+      this._age = value
+    }
+  }
+  get age () {
+    return Math.floor(this.age)
+  }
+  publish() {
+    if(currPublidhNum < publishNum) {
+      console.log('发布一片文章')
+      this.publishNum = this.publishNum + 1
+    } else {
+      console.log('发布达到上限')
+    }
+  }
+}
 ```
 
