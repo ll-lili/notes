@@ -889,7 +889,7 @@ export default App
 // 二级路由
 import React, { FC } from 'react'
 import { Outlet } from 'react-router-dom'
-// Outlet相当于vue中slot
+// Outlet相当于vue中<router-view>
 
 const MainLayout: FC = () => {
     return (
@@ -1069,6 +1069,160 @@ const Demo: React.FC = () => {
 
 ### 状态管理Redux
 
+#### 传统方式（弃用或过时）
+
+- redux的使用
+
+```jsx
+/**
+* npm install redux --save
+*/
+// store/index.js
+import { createStore } from 'redux'
+function counterReducer(satte = {count: 0}, action) {
+    switch (action.type) {
+        case 'increment':
+            return {count: state.count + action.payload]} // state是不可变数据
+        case 'decrement':
+            return {count: state.count - 1}
+    }
+}
+const store = createStore(counterReducer)
+export default store
+
+// src.demo.jsx
+import store from '../store'
+export default function Demo () {
+    const [count, setCount] = useState(store.getState().count)
+    // 修改count
+    const handleClick = () => {
+        store.dispatch({type: 'increment', payload: 5})
+    }
+    // 监听state变化
+    store.subscribe(() => {
+        setCount(store.getState().count)
+    })
+    return (<div>{count}</div>)
+}
+
+```
+
+- react-redux简化对redux的使用
+
+```JSX
+/**
+* react-redux简化对redux的使用
+* npm install react-redux
+*/
+// index.js
+import {Provider} from 'react-redux'
+import store from '../store'
+const root = ReactDOM.createRoot(document.getElementById('root')
+root.render(
+  <React.StrictMode>
+    <Provider store={store}>
+   	 <App />
+    </Provider>
+  </React.StrictMode>
+)
+// src.demo.jsx
+import {useSelector, useDispatch} from 'react-redux'
+export default function Demo () {
+    const count = useSelector(state => state.count)
+    const dispatch = useDispatch()
+    // 修改count
+    const handleClick = () => {
+        dispatch({type: 'increment', payload: 5})
+    }
+    return (<div>{count}</div>)
+}
+```
+
+- 多个reducer函数及redux模块化
+
+```JS
+// store/modules/counterReducer.js
+export default function counterReducer(satte = {count: 0}, action) {
+    switch (action.type) {
+        case 'counter/increment':
+            return {count: state.count + action.payload]} // state是不可变数据
+        case 'counter/decrement':
+            return {count: state.count - 1}
+    }
+}
+// store/index.js
+import { createStore, combineReducers } from 'redux'
+import counterReducer from './modules/counterReducer.js'
+const store = createStore(combineReducers({
+    counter: counterReducer
+}))
+export default store
+
+```
+
+#### redux-thunk 中间件处理异步操作
+
+```jsx
+/**
+* npm install redux-thunk --save
+*/
+// store/modules/counterReducer.js
+export default function counterReducer(satte = {count: 0}, action) {
+    switch (action.type) {
+        case 'counter/increment':
+            return {count: state.count + action.payload]} // state是不可变数据
+        case 'counter/decrement':
+            return {count: state.count - 1}
+    }
+}
+// 需要thunk支持
+export function incrementAction() {
+    return (dispatch) => {
+			setTimeOut(() => {
+                dispatch({type: 'increment', payload: 5})
+            }, 200)
+        }
+}
+// store/index.js
+import { createStore, combineReducers, applyMiddleWare } from 'redux'
+import thunk from 'redux-thunk'
+import counterReducer from './modules/counterReducer.js'
+
+
+const store = createStore(combineReducers({
+    counter: counterReducer
+}), applyMiddleWare(thunk))
+export default store
+
+// src.demo.jsx
+import {useSelector, useDispatch} from 'react-redux'
+import {incrementAction} from '../store/modules/counterReducer.js'
+export default function Demo () {
+    const count = useSelector(state => state.count)
+    const dispatch = useDispatch()
+    // dispatch 可以支持回调函数
+    const handleClick = () => {
+        dispatch((dispatch) => {
+			setTimeOut(() => {
+                dispatch({type: 'increment', payload: 5})
+            }, 200)
+        })
+        // 将上面方式封装一个函数
+        dispatch(incrementAction())
+    }
+    return (<div>{count}</div>)
+}
+```
+
+
+
+#### 最新解决方案**RTK**：`@reduxjs/toolkit`
+
+- 可以自定和redux devtools结合，不需要安装模块进行生效
+- 数据不需要通过返回值进行修改（自动处理state不可变性）
+- 内置redux-thunk这个异步插件
+- 代码风格更好，采用选项式编写程序
+
 ```tsx
 /**
 * src/store/index.ts
@@ -1093,19 +1247,20 @@ import { createSlice } from '@reduxjs/toolokit'
 
 const INIT_STATE: number = 100
 export const countSlice = createSlice({
-    name: 'count', // 模块名字
+    // dispatch('count/increase')
+    name: 'count', // 模块名字（命名空间）
     initialState: INIT_STATE,
     reducers: {
         increase (state: number) {
 			return state + 1
         },
         decrease (state: number) {
-            return state -1 // 返回新的state(不可变数据)
+            return state -1 
         }
     }
 })
 
-export const {increase, decrease} = countSilce.actions
+export const {increase, decrease} = countSilce.messageSlice
 export default countSilce.reducer
 /**
 * src/store/todoList.ts
@@ -1169,9 +1324,61 @@ const Count: FC = () => {
 }
 ```
 
+#### redux-toolkit处理异步任务
+
+- createAsyncThunk方法创建异步任务
+- extraReducers配置额外的reducer
+
+```ts
+/**
+* messageReducer
+*/
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit'
+
+type MessageType = {
+    msg: string,
+    UpperMsg: string
+}
+
+const INIT_STATE: MessageType= {
+	msg: '',
+    UpperMsg: this.msg.toUpperCase()
+}
+// 异步action
+export const messageTestAction = createAsyncThunk('message/testAction', async () => {
+    return await new Promise((resolve) => {
+        setTimeOut(() => {
+            resolve('response data')
+        }, 2000)
+    })
+})
+const messageSlice = createSlice({
+    name: 'message',
+    inirialState: INIT_STATE,
+    reducers: {
+		change (state: MessageType, action: PayloadAction<string>) {
+			state.msg = action.payload
+            state.UpperMsg = state.msg.toUpperCase()
+        }
+    },
+    extraReducers： {
+    	[messageTestAction.fulfilled] (state: MessageType, action: PayloadAction<string>) {
+    		state.msg = action.payload
+            state.UpperMsg = state.msg.toUpperCase()
+		}		
+	}
+})
+export const { change } = messageSlice.messageSlice
+
+```
+
+
+
 #### Redux单项数据流
 
-dd
+### MobX
+
+
 
 ### React与TS
 
