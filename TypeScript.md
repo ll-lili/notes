@@ -500,7 +500,62 @@ type D = {
 } & C
 ```
 
+##### readonly修饰符
 
+- 修饰目标属性只读
+
+- 有readonly修饰符的属性，只能在最开始的赋值一次。后不能修改。
+- 不在编译结果中
+- 在类型别名相同使用
+
+```ts
+interface User = {
+	readonly id: string
+  name: string
+  age: number
+}
+const  u: User = {
+  id: '1',
+  name: 'LL',
+  age: 22
+}
+// u.id = 2 // 不 可以修改
+
+// 只读数组 写法
+const arr: redaonly number[] = [1, 2, 3]
+const arr2: ReadonlyArray<number> = [1, 2, 3]
+```
+
+#### 类型兼容性
+
+B->A,如果能完成**赋值**，则B和A类型兼容。
+
+鸭子辩型法（子结构辩型法）：目标类型（A）需要某一些特征，赋值的类型（B）只要能满足该特征即可
+
+- 基本类型：完全匹配
+- 对象类型：鸭子辩型法
+- 函数类型：参数：传递给目标函数的参数可以少传，不能多传（回调函数）
+
+```ts
+interface Duck {
+  sound: 'gagaga'
+  swim(): void
+}
+
+const p = {
+  name: '伪装成鸭子的人',
+  age: 22,
+  sound: 'gagaga' as 'gagaga',
+  swim () {
+    console.log('游泳')
+  }
+}
+const d: Duck = p
+```
+
+> 当直接使用对象字面量进行赋值时，会进行更加严格的判断。
+>
+> （理解：在可控状态下，不允许写错。非可控状态（来自第三方的值），可以适当宽松匹配。）
 
 ### TS中的类
 
