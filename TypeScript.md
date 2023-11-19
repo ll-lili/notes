@@ -31,11 +31,11 @@
 
 ### node中搭建TS开发环境
 
-- 安装TypeScript
+#### 安装TypeScript
 
-  ```shell
-  npm install -g typescript
-  ```
+```shell
+npm install -g typescript
+```
 
 >默认情况下，TS会做出下面几种假设：
 >
@@ -48,29 +48,31 @@
 >1. 使用tsc命令行加上选项参数
 >2. 使用配置文件（tsconfig.json）,更改编译选选项
 
-- TS配置文件
+#### TS配置文件
 
-  ```bash
-  tsc --init # 生成配置文件tsconfig.json
-  
-  # 添加node执行环境
-  npm install @types/node --save
-  ```
+```bash
+tsc --init # 生成配置文件tsconfig.json
 
-  ```json
-  {
-      "compilerOptions": { // 编译选项
-          "target": "es2016", // 配置编译目标代码的标准
-          "module": "commonjs", // 配置编译目标使用的模块化标准
-          "lib": ["es2016", "dom"], // 执行环境（库）
-          "outDir": "./dist", // 编译结果的目录
-          "strictNullChecks": true // 严格的空类型检查 
-      },
-      "include": ["./src"], // 需要编译的文件目录
-      // "files": ["./src/index.ts"] // 需要编译的文件
-      
-  }
-  ```
+# 添加node执行环境
+npm install @types/node --save
+```
+
+```json
+{
+    "compilerOptions": { // 编译选项
+        "target": "es2016", // 配置编译目标代码的标准
+        "module": "commonjs", // 配置编译目标使用的模块化标准
+        "lib": ["es2016", "dom"], // 执行环境（库）
+        "outDir": "./dist", // 编译结果的目录
+        "strictNullChecks": true, // 严格的空类型检查 
+      	"removeComments": true, // 移除注释
+      	"esModuleInterop": true, // 启用ES模块化交互非模块导出
+    },
+    "include": ["./src"], // 需要编译的文件目录
+    // "files": ["./src/index.ts"] // 需要编译的文件
+    
+}
+```
 
 > 使用了配置文件后，使用tsc进行编译时，不能跟上文件名，跟上文件名忽略配置文件。
 
@@ -332,98 +334,72 @@ hasPermussion(p, Permussion.Read)
 p = p ^ Permussion.Read
 ```
 
-### 泛型
+### TS中的模块化
 
-- 是指附属于函数、类、接口、类型别名之上的类型
-- 泛型相当于是一个类型变量，在定义时，无法知道具体的类型，可以用该变量来代替，只有到调用时才能确定类型
-- 很多时候，ts会只能的根据参数推断出泛型的具体类型
-- 泛型可以赋值默认值
+#### TS中如何书写模块化语句
 
-#### 在函数中使用泛型
+TS中，导入和导出模块，统一使用ES6的模块化标准。
 
-- 在函数名之后`<类型>`
+> 使用导入时不要加扩展名，如 ： import { xx } from './xx.ts'
+>
+> 因为ts需要编译成js,会报错。
 
-```ts
-// 取出数组的前几项
-function take<T>(arr: T[], n: number): T[] {
-    if (n>= arr.length) {
-        return arr
-    }
-    const newArr: T[] = []
-    for (let i =0; i < n; n++) {
-        newArr.push(arr[i])
-    }
-    return newArr
-}
-take<number>([1, 22, 135], 2)
-```
+#### 编译结果中的模块化标准
 
-#### 在类型别名、接口、类中使用泛型
+可配置
 
-- 直接在名称之后`<类型>`
+- 如果编译结果的模块化是ES6，则没有区别
 
-```ts
-type CallbackType<T> = (item: T, i: number) => boolean
+- 如果编译结果的模块化标准是commonjs:
+  - 导出的声明会变成exports的属性
+  - 默认的导出会变成exports的default属性
 
-function filter<T>(arr:T[], callback:CallbackType<T>) {
-  const newArr: T[] = []
-  arr.forEach((item, i) => {
-    if (callback(item, i)){
-			newArr.push(item)
-    }
-  })
-  return newArr
-}
+#### 解决默认导入的错误
 
-const list = [1, 2, 3, 4]
-const res = filter(list, (item) => item > 3)
-console.log(res) // [ 4 ]
-```
+- Tsconfig.json
 
-```ts
-// ...dd
-class ArrayHelper {
-  take<T>(arr: T[], n: nomber): T[] {
-		if (n>= arr.length) {
-        return arr
-    }
-    const newArr: T[] = []
-    for (let i =0; i < n; n++) {
-        newArr.push(arr[i])
-    }
-    return newArr
+```json
+{
+  "compilerOptions": {
+    "esModuleInterop": true // 启用ES模块化交互非模块导出
   }
 }
 ```
 
-#### 泛型约束
 
-- 泛型约束用于限制泛型的取值
+
+> 使用module.exports = {},使用import导入没有没有默认导入.
+>
+> 可以使用{}按需导入
+>
+> 或者import * as xx from 'xx'
+
+#### 在TS中写commonjs
+
+- 导出： export = {}
+- 导入： import xx = require('./xx.ts')
 
 ```ts
-function nameToUpperCase<T extends {name: string}>(obj: T):T {
-  obj.name = obj.name.split(' ').map(str => str[0].toUpperCase() + str.substring(1)).join(' ')
-  return obj
+// a.ts
+export = {
+  name: 'LL',
+  say (str: string) {
+		console.log(str)
+  }
 }
+// b.js
+
+import a = require('a.js')
 ```
 
-#### 多泛型
+#### 模块解析
 
-```ts
-function mixinArray<T, K> (arr1: T[], arr2:K[]): (T | K) [] {
-  if (arr1.length !== arr2.length) {
-    throw new Error('数组长度不一致')
-  }
-  const result: (T | K) [] = []
-  for (let i = 0; i < arr1.length; i++) {
-    result.push(arr1[i])
-    result.push(arr2[i])
-  }
-  return  result
-}
-```
+从什么位置寻找模块，
 
+TS中有两种模块解析策略。
 
+- Classic：经典（过时）
+- node解析策略（唯一变化，将js变为ts）
 
 ### 接口和类型兼容性
 
@@ -534,7 +510,7 @@ B->A,如果能完成**赋值**，则B和A类型兼容。
 
 - 基本类型：完全匹配
 - 对象类型：鸭子辩型法
-- 函数类型：参数：传递给目标函数的参数可以少传，不能多传（回调函数）
+- 函数类型：一切都很自然。参数：传递给目标函数的参数可以少传，不能多传（回调函数）
 
 ```ts
 interface Duck {
@@ -608,4 +584,93 @@ class User {
   }
 }
 ```
+### 泛型
 
+- 是指附属于函数、类、接口、类型别名之上的类型
+- 泛型相当于是一个类型变量，在定义时，无法知道具体的类型，可以用该变量来代替，只有到调用时才能确定类型
+- 很多时候，ts会只能的根据参数推断出泛型的具体类型
+- 泛型可以赋值默认值
+
+#### 在函数中使用泛型
+
+- 在函数名之后`<类型>`
+
+```ts
+// 取出数组的前几项
+function take<T>(arr: T[], n: number): T[] {
+    if (n>= arr.length) {
+        return arr
+    }
+    const newArr: T[] = []
+    for (let i =0; i < n; n++) {
+        newArr.push(arr[i])
+    }
+    return newArr
+}
+take<number>([1, 22, 135], 2)
+```
+
+#### 在类型别名、接口、类中使用泛型
+
+- 直接在名称之后`<类型>`
+
+```ts
+type CallbackType<T> = (item: T, i: number) => boolean
+
+function filter<T>(arr:T[], callback:CallbackType<T>) {
+  const newArr: T[] = []
+  arr.forEach((item, i) => {
+    if (callback(item, i)){
+			newArr.push(item)
+    }
+  })
+  return newArr
+}
+
+const list = [1, 2, 3, 4]
+const res = filter(list, (item) => item > 3)
+console.log(res) // [ 4 ]
+```
+
+```ts
+// ...dd
+class ArrayHelper {
+  take<T>(arr: T[], n: nomber): T[] {
+		if (n>= arr.length) {
+        return arr
+    }
+    const newArr: T[] = []
+    for (let i =0; i < n; n++) {
+        newArr.push(arr[i])
+    }
+    return newArr
+  }
+}
+```
+
+#### 泛型约束
+
+- 泛型约束用于限制泛型的取值
+
+```ts
+function nameToUpperCase<T extends {name: string}>(obj: T):T {
+  obj.name = obj.name.split(' ').map(str => str[0].toUpperCase() + str.substring(1)).join(' ')
+  return obj
+}
+```
+
+#### 多泛型
+
+```ts
+function mixinArray<T, K> (arr1: T[], arr2:K[]): (T | K) [] {
+  if (arr1.length !== arr2.length) {
+    throw new Error('数组长度不一致')
+  }
+  const result: (T | K) [] = []
+  for (let i = 0; i < arr1.length; i++) {
+    result.push(arr1[i])
+    result.push(arr2[i])
+  }
+  return  result
+}
+```
