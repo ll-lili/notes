@@ -674,3 +674,223 @@ function mixinArray<T, K> (arr1: T[], arr2:K[]): (T | K) [] {
   return  result
 }
 ```
+
+### 深入理解类和接口
+
+#### 类的继承
+
+如果A和B都是类，并且可以描述为A是B，则A和B形成继承关系：
+
+- B是父类，A是子类
+- B派生A，A继承自B
+- B是A的基类，A是B的派生类
+
+如果A继承自B，则A自动拥有B的所有成员。
+
+##### 成员重写
+
+- 子类中覆盖分类的成员
+- 子类成员不能改变父类成员类型
+- 无论是属性还是方法，子类都可以对父类的相应成员进行重写 ，但是要保证类型匹配。
+- super关键字，可以子类的方法中调用父类成员
+
+> 在继承关系中，this的指向是动态调用方法时，根据具体调用者确定this的指向。
+
+##### 类型匹配
+
+鸭子辩型法
+
+- 子类的对象始终可以赋值给父类（子类的成员一定包括父类的成员）
+- 判断一个对象具体子类型，可以使用instanceof
+
+##### protected修饰符
+
+受保护的成员，只能在自身和子类中访问
+
+##### 单根性和传递性
+
+- 单根性： 每个类最多有一个父类
+- 传递性：如果A是B的父类，B是C的父类，那么可以认为A是C的父类
+
+#### 抽象类
+
+有时某个类只表示一个抽象概念，主要用于提取子类的共有成员，而不能直接创建它的对象。
+
+该类可以作为抽象类。
+
+- 在类前面加上`abstract`表示一个抽象类
+- 抽象类不能被创建对象
+
+```ts
+abstract class Chess {
+  
+}
+```
+
+##### 抽象成员
+
+父类中，可能知道某些成员是必须存在的，但不知道该成员的值或实现是什么，需要有一种强约束，
+
+让继承该类的子类，必须要实现该成员。
+
+抽象类中可以有抽象成员，这些成员必须在子类中实现
+
+```ts
+abstract class Chess {
+  abstract readonly name: string
+  abstract move: (xTarger: number, yTarget: number) => boolean
+}
+// 子类实现父类抽象成员的三中写法
+class Horse extends Chess {
+  readonly name: string = '马'
+}
+class Soldier extends Chess {
+  get name () {
+    return '兵'
+  }
+}
+class Pao extends Chess {
+  name: sring
+  constructor () {
+		super() // 调用父类的构造函数
+		this.name = '炮'
+  }
+}
+```
+
+#### 静态成员
+
+静态成员指，附属在类上的成员
+
+使用static修饰的成员时是静态成员
+
+实例成员：对象成员，属于某个类的实例对象
+
+静态成员：非实例成员，属于某个类的成员
+
+##### 静态方法中的this
+
+实例方法中this，指向当前对象
+
+静态方法中的this指向当前类
+
+#### 设计模式
+
+面对一些常见的功能场景，有一些固定的，经过长期实践的成熟方法，称之为设计模式。
+
+##### 模版模式
+
+有些方法，所有的子类实现流程完全一致，只是流程中的某个步骤的具体实现不一致，
+
+可以将该方法提取到父类，再父类中完成整个流程的实现，遇到实现不一致的方法时，将该方法做成抽象方法。
+
+##### 单例模式
+
+某些类的对象，在系统中最多有一个，为了避免开发者造成随意创建多个对象，可以使用单例模式。
+
+```ts
+class Board {
+  width: number = 200
+  height: number = 200
+  init () {
+
+  }
+  // static readonly createBoard = new Board()
+  private static _board?: Board
+  private static createBoard () {
+    if (Board._board) {
+      return Board._board
+    } else {
+      Board._board = new Board()
+      return Board._board
+    }
+  }
+}
+```
+
+#### 接口和类
+
+- 强制某个类实现一个接口，对类的成员实现强约束力。
+
+- 面向对象领域中的接口的语义：表达了某个类是否拥有某种能力。
+
+- 某个类具有某种能力，就是类实现某个接口。
+- 类型保护函数：通过调用该函数，触发TS的类型保护，该函数返回一个布尔值。
+- 接口可以继承类，表示类所有的成员都在接口中
+
+```ts
+
+interface ITeaching = {
+  teachingEn(): void
+}
+abstract class People {
+  abstract career: string
+  constructor(
+  	public name: string,
+    public age: number
+  ) {}
+}
+// Teacher类实现ITeaching接口
+class Teacher extends People implements ITeaching {
+  career: string = '教师'
+  teachingEn () {
+    console.log('教英语')
+  }
+}
+class Student extends People  {
+  career: string = '学生'
+}
+
+// 类型保护函数
+function hasITeaching(people: any): people is ITeaching {
+  return people.teachingEn
+}
+const t = new Teacher('lisi',33)
+const s = new Student('zhangsan',22)
+const list:People[] = [t, s]
+list.forEach(p => {
+  if(hasITeaching(p)) {
+    console.log(p.name)
+    p.teachingEn()
+  }
+})
+```
+
+> 接口和类型别名对区别：接口（一定）可以被类实现。
+>
+> （类只能实现具有静态已知成员的对象类型或对象类型的交集）
+
+#### 索引器
+
+- 索引器的键可以是string，也可以是number
+- 索引器的值的类型，是对象所有成员类型的联合类型，或者是any类型。（其他成员类型必须是索引器值类型的子类型）
+- 在类中，索引器的位置必须在所有成员之前。
+
+```ts
+class User {
+  [prop: string]:any
+  constructor(
+  	public name: string,
+    public age: number
+  ) {}
+  sayHello () {}
+}
+```
+
+> 在TS中默认情况下，不对索引器（成员表达式），做严格类型检查。
+>
+> 使用配置`noImplicitAny`为true，开启对隐式any的检查。
+>
+> 隐式any：TS根据实际情况推导出的any类型。
+>
+> 索引器的作用：
+>
+> 1. 在严格的检查下，可以为对象添加成员
+> 2. 可以动态操作对象的成员
+>
+> 在js中，对象的所有成员名都是字符串，如果使用数字作为成员名，会自动转为字符串
+>
+> 在ts中，使用两种类型的索引器，两种索引器的值必须一致。
+
+
+
