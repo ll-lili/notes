@@ -890,7 +890,67 @@ class User {
 >
 > 在js中，对象的所有成员名都是字符串，如果使用数字作为成员名，会自动转为字符串
 >
-> 在ts中，使用两种类型的索引器，两种索引器的值必须一致。
+> 在ts中，使用两种类型的索引器，两种索引器的值类型必须一致。
 
+#### this指向约束
 
+##### 在JS中this指向的几种情况
+
+1. 大部分情况，取决于函数的调用方式：
+
+- 如果直接调用函数（全局调用），this指向全局对象或者undefined（启用严格模式）。
+- 如果使用`对象.函数`的形式调用，this指向对象本身。
+- 如果是dom事件的处理函数，this指向事件处理对象。
+
+2. 箭头函数：this在函数声明时确定指向，指向函数所在位置的this。
+3. 使用bind apply call等函数手动绑定this对象指向。
+
+##### TS中的this
+
+- tsconfig.json编译选项中`noImplicitThis`值为true，表示不允许this隐式指向any（不允许不明确this指向）
+- 在TS中，允许在书写函数时，手动声明该函数的this指向，将this作为函数的第一个参数，该参数只作为约束this，并不是真正的参数，也不会出现在编译结果中。
+
+```ts
+const user = {
+  name: 'll',
+  age: 22,
+  sayHello () {
+		console.log(this)
+  }
+}
+const s = user.sayHello
+s() // 全局对象
+
+// class一定严格模式
+class User {
+  constructor(
+  	public name: string,
+    public age: number
+  ) {}
+  sayHello () {
+    console.log(this, this.name)
+  }
+}
+const u = new User('ll', 22)
+const say = u.sayHello
+say() // undefined undefined
+```
+
+```ts
+interFace IUser {
+  name: string
+  age: number
+  sayHello(this: IUser): void // this不是参数
+}
+const u: IUser = {
+  name: 'll',
+  age: 22,
+  sayHello() {
+    console.log(this)
+	}
+}
+
+const say = u.sayHello
+say() // 报错：say上下文中this，不能分配给IUser
+```
 
