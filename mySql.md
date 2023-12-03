@@ -43,7 +43,7 @@
 
   ```shell
   net start mysql # 启动
-  n et stop mysql # 关闭
+  net stop mysql # 关闭
   ```
 
 * 登录
@@ -53,6 +53,9 @@
   # 根据提示输入密码。
   ```
 
+* ```shell
+  show variables like 'character\_set\_%'
+  
 * 修改密码
 
   ```shell

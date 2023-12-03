@@ -67,8 +67,8 @@ npm install @types/node --save
         "strictNullChecks": true, // 严格的空类型检查 
       	"removeComments": true, // 移除注释
       	"esModuleInterop": true, // 启用ES模块化交互非模块导出
+        "include": ["./src"], // 需要编译的文件目录
     },
-    "include": ["./src"], // 需要编译的文件目录
     // "files": ["./src/index.ts"] // 需要编译的文件
     
 }

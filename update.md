@@ -329,6 +329,37 @@ export default {
 </script>
 ```
 
+#### UI组件的二次封装
+
+```vue
+<template>
+	<div>
+        <!-- 动态绑定属性 -->
+        <el-input v-bind="$attrs">
+    		<!--动态设置插槽-->
+            <template v-for="(value, name) in $slots" #[name]="scopeData">
+                <slot :name="name" v-bind="scopeData">
+    				
+    			</slot>
+			</template>
+    	</el-input>
+    </div>
+</template>
+<script>
+    export default {
+        props: ['a', 'b'],
+        created () {
+            console.log(this.$attrs)
+            // 输出除了props中的其他所有属性(事件)
+            console.log(this.$slots)
+            // 输出插槽 {}
+        }
+    }
+</script>
+```
+
+
+
 ### VUE2.x 原理
 
 #### 如何理解 MVVM
