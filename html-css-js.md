@@ -707,6 +707,62 @@ response.setHeader("Access-Control-AlLow-Credentials", "true");
 
 
 
+#### Object
+
+##### getOwnPropertyDescriptor
+
+- 属性描述符
+
+```js
+const obj = {
+  name: 'll',
+  age: 22
+}
+console.logo(Object.getOwnPropertyDescriptor(obj, name))
+/*
+{
+  configurable: true, // 可配置
+  enumerable: true, // 可枚举
+  value: "ll",
+  writable: true // 可写
+}
+*/
+
+```
+
+#### defineProperty
+
+- 静态方法会直接在一个对象上定义一个新属性，或修改其现有属性，并返回此对象。
+
+```js
+const obj = {
+  name: 'll',
+  age: 22
+}
+Object.defineProperty(obj, 'name', {
+// 属性配置
+  configurable: false, // 可配置
+  enumerable: false, // 可枚举
+  value: "hh",
+  writable: true // 可写
+})
+// getter setter
+const test = {}
+let value = ''
+Object.defineProperty(test, 'a', {
+	get () {
+		// 读取属性a时，得到该方法的返回值
+    return value
+  },
+  set (val) {
+		// 设置属性a时，会把值传给val，调用该方法
+    value = val
+  }
+})
+```
+
+
+
 #### Event loop(事件循环/事件轮询)
 
 * 同步代码，一行一行放在 Call Stack(调用栈)中执行

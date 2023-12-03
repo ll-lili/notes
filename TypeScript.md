@@ -1,4 +1,4 @@
-# TypeScript
+#  TypeScript
 
 ### JS开发中的问题
 
@@ -952,5 +952,126 @@ const u: IUser = {
 
 const say = u.sayHello
 say() // 报错：say上下文中this，不能分配给IUser
+```
+
+### 装饰器(decorator)
+
+`tsconfig.json`： 配置experimentalDecorators为true
+
+- 面向对象概念（java：注解，c#：特征）
+
+- 本质：就是一个函数。
+
+- 作用：为某些属性、类、方法、参数提供元数据信息。
+
+- 原数据：描述数据的数据
+
+- 装饰器，可以修饰类、成员（属性和方法）、参数
+
+#### 解决问题
+
+- 关注点问题（分散关注点）
+- 代码重复问题
+
+> 产生上述问题的根源：
+>
+> 某些信息在定义时，能附加的信息也太少。
+
+#### 类装饰器
+
+类装饰器的本身是一个函数，该函数接受一个参数，表示类本身（构造函数本身）。
+
+使用装饰器`@装饰器名称`，**@后面一定的到一个函数。**
+
+在TS中约束一个变量为类：
+
+- Function
+- `new(参数) => object`
+
+装饰器函数的运行时间：在类定义后就会直接运行
+
+类装饰器可以具有的返回值：
+
+1. void： 仅运行函数
+2. 返回一个新的类：会将新的类替换到装饰目标
+
+多装饰器情况：
+
+- 运行顺序从下到上（函数，不是函数调用）
+
+```ts
+function test (target: new(...rest: any[]) => object) {
+  console.log(target)
+}
+@test
+class A {
+
+}
+
+function test2 (number) {
+  console.log(number)
+ return function (target: new(...rest: any[]) => object) {
+    console.log(target)
+ }
+}
+@test2(1)
+class A2 {
+
+}
+
+```
+
+#### 成员装饰器
+
+可以多装饰器修饰
+
+##### 属性装饰器
+
+- 属性装饰器也是一个函数，该函数需要两个函数：
+  1. 如果是静态属性，则是类本身；如果是实例属性，则为类的原型。
+  2. 固定一个字符串，表示属性名。
+
+```ts
+function test (target: any, prop: string) {
+  console.log(target, prop)
+  // {} prop1 -> {} === A.prototype
+	// [Function: A] { prop2: 0 } prop2
+}
+
+class A { 
+  @test
+  prop1: string = 'hello'
+  @test
+  static prop2: number = 0
+}
+
+```
+
+##### 方法装饰器
+
+- 方法装饰器也是一个函数，该函数需要三个函数：
+  1. 如果是静态方法，则是类本身；如果是实例属性，则为类的原型。
+  2. 固定一个字符串，表示方法名。
+  3. 描述符对象。
+
+```ts
+function test2 (target: any, prop: string, descriptor: PropertyDescriptor) {
+  console.log(target, prop, descriptor)
+  /*
+  { method1: [Function (anonymous)] } method1 {
+    value: [Function (anonymous)],
+    writable: true,
+    enumerable: true,
+    configurable: true
+  }
+  */
+}
+class A { 
+  @test2
+  method1 () {
+
+  }
+}
+
 ```
 
