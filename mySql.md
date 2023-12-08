@@ -101,119 +101,245 @@
   sudo chmod -R 777 /usr/local/mysql/data
   ```
 
+
+#### 字段
+
+字段名、字段类型、自增、是否位null、默认值
+
+
+##### 字段类型
+
+- bit：占一位，0或者1，false或者true
+- int：占32位，整数
+- decimal（M，N）：能精准计算的实数，M是总的数子位数，N是小数位数
+- char(n)：固定长度位n的字符
+- varchar(n)：长度可变，最大长度位n的字符
+- text：大量的字符
+- date：仅日期
+- datetime：日期时间
+- time：仅时间
+
+#### 主键
+
+- 唯一
+- 不能更改
+- 无业务含义
+
+#### 外键
+
+- 用于产生表关系的列
+- 外键列回连接到另一张表
+
+#### 表关系
+
+- 一对一
+- 一对多
+- 多对多
+
+#### 三大设计范式
+
+1. 要求数据库表的每一项都是不可分割的原子数据项
+2. 非主键列必须依赖于主键
+3. 非主键列必须直接依赖主键列
 #### mySQL常用操作
 
-* 查询版本
+##### 查询版本
 
-  ```mysql
-  SELECT VERSION()
-  ```
+```mysql
+SELECT VERSION();
+```
 
-* 创建数据库
+##### 创建数据库
 
-  ```mysql
-  CREATE DATANASE testdb;
-  ```
+```mysql
+CREATE DATANASE testdb;
+```
 
-* 显示所有数据库
+##### 显示所有数据库
 
-  ```mysql
-  SHOW DATABASES;
-  ```
+```mysql
+SHOW DATABASES;
+```
 
-* 选择数据库
+##### 选择数据库
 
-  ```mysql
-  USE testdb;
-  ```
+```mysql
+USE testdb;
+```
 
-* 显示所有表
+##### 显示所有表
 
-  ```mysql
-  SHOW TABLES;
-  ```
+```mysql
+SHOW TABLES;
+```
 
-* 插入数据
+##### 插入数据
 
-  ```mysql
-  INSERT INTO users (username, `password`, realname) VALUES ('lishi', '123456', '李四')
-  ```
+```mysql
+# 插入一条 ``为了区分关键字
+INSERT INTO users (username, `password`, realname) VALUES ('lishi', '123456', '李四');
+# 插入多条
+INSERT INTO users (username, `password`, realname) VALUES ('lishi', '123456', '李四'),('lishi', '123456', '李四');
+```
 
-* 查询数据
+##### 更新数据
 
-  ```mysql
-  SELECT * FROM users; # 查询users表的所有数据
-  SELECT id, username FROM users; # 查询指定列的数据
-  SELECT * FROM users WHERE username = 'zhangsan' # 按条查询
-  SELECT * FROM users WHERE username = 'zhangsan' and `password` = '123456' #
-  SELECT * FROM users WHERE username = 'zhangsan' or `password` = '123456' #
-  SELECT * FROM users WHERE username like '%s%' # 模糊查询
-  SELECT * FROM users WHERE username like '%s%' order by id desc # 模糊查询，倒序
-  
-  # password为关键词，加``
-  ```
+```mysql
+UPDATE users SET realname = '李斯' WHERE id = '1';
+```
 
-* 更新数据
+##### 删除数据
 
-  ```mysql
-  UPDATE users SET realname = '李斯' WHERE username = 'lisi'
-  ```
+```mysql
+# 真删除
+DELETE FROM users WHERE username = 'lisi';
 
-* 删除数据
+# 软删除：添加一列state默认值等于1
+UPDATE users SET state = 0 WHERE	username = 'lisi';
+SELECT * FROM	users WHERE	state <> 0;
 
-  ```mysql
-  # 真删除
-  DELETE FROM users WHERE username = 'lisi'
-  
-  # 软删除：添加一列state默认值等于1
-  UPDATE users SET state = 0 WHERE	username = 'lisi';
-  SELECT * FROM	users WHERE	state <> 0;
-  
-  ```
+```
 
-  
+##### 单表查询数据
+
+- select 后面查询字段
+- from 后面数据源（表）
+- where 后面查询条件
+- order by 排序
+- limit： n,m 跳过n条数据，取出m条数据
+
+```mysql
+SELECT * FROM users; # 查询users表的所有数据
+SELECT id, username FROM users; # 查询指定列的数据
+SELECT username as 'name', "新列" as "new" FROM users; # 查询指定列设置别名
+SELECT distinct location FROM users; # distinct去重
+
+
+SELECT realname AS "name",
+CASE gender 
+WHEN 1 THEN '男'
+ELSE '女' 
+END as sex
+FROM users;# case进一步处理查询结果
+	
+SELECT realname AS "name",
+case
+when gender = 0 then '男'
+when gender = 1 then '女'
+else '未知'
+end as sex
+FROM users;# case进一步处理查询结果
+
+
+
+ # 按条查询
+SELECT * FROM users WHERE username = 'zhangsan';
+SELECT * FROM users WHERE username = 'zhangsan' and `password` = '123456'; # and
+SELECT * FROM users WHERE username = 'zhangsan' or `password` = '123456'; # or
+select * from users where id in (1, 2); # 范围
+select * from users where id between 1 and 3; # 范围
+select * from users where location is null; # 查询null
+select * from users where location is not null; # 查询 not null
+SELECT * FROM users WHERE username like '%s%'; # 模糊查询
+SELECT * FROM users WHERE username like '%s%' order by id desc; # 模糊查询，desc：倒序； asc：升序
+
+# password为关键词，加``
+```
+
+##### 联表查询
+
+- 笛卡尔积 ...from a,b
+- 左连接，左外连接，left join ...from a left join b
+- 右连接，右外连接，right join
+- 内连接，inner join ...from a inner join b
+
+```shell
+# ...from a,b
+```
+
+##### 函数
+
+- 数学
+  - ABS(x) 返回x的绝对值
+  - CEILING 向上取整
+  - FLOOR 向下取整
+  - MOD（x, y） 返回x/y的模（余数）
+  - PI() 返回pi的值（圆周率）
+  - RAND() 返回0到1的随机数
+  - ROUND（x,y） 返回参数x的四舍五入的有y位的小数的值
+  - TRUNCATE（x,y）返回数字x截断短y位的小数的结果
+- 聚合
+  - AVG(col) 返回指定列的平均子
+  - COUNT(col) 返回指定列中非NULL值的个数
+  - MIN（col） 返回指定列的最小值
+  - MAX(col)
+  - SUM(col)
+- 字符
+  - CONCAT(s1, s2,...,Sn) 连接字符串
+  - CONCAT_WS(sep,s1, s2,...,Sn) 连接字符串,并用sep字符间隔
+  - TRIM（str）去除字符串首尾的所有空格
+  - LTRIM（str）从字符串str中切掉开头的空格
+  - RTRIM（str）
+- 日期
+  - CURDATE()或者CURRENT_DATE（）　返回当前日期
+  - CURTIME()或者CURRENT_TIME（）　返回当前时间
+  - TIMESTAMPDIFF（part, date1,date2）返回date1到date2之前相隔的part值，part是用于指定的相隔的年 月  日
+
+##### 分组
+
+- 分组后，只能查询分组的列和聚合列
+- 运行顺序： 
+  - form
+  -  join..on.. 
+  -  where 
+  - group by
+  - select
+  - having
+  - orderby
+  - limit
+
+##### 视图
+
+。。。
 
 #### nodejs操作mySQL
 
-* `mysql`连接mySQL8失败,也可以使用`mysql2`模块操作mySQL
+`mysql`连接mySQL8失败,也可以使用`mysql2`模块操作mySQL
 
-  ```mysql
-  # 新的mysql模块并未完全支持MySQL8的“caching_sha2_password”加密方式，而“caching_sha2_password”在MySQL 8中是默认的加密方式。
-  
-  # 下面的方式命令是默认已经使用了“caching_sha2_password”加密方式，该账号、密码无法在mysql模块中使用。
-  ALTER USER 'root'@'localhost' IDENTIFIED BY '123456'; 
-  
-  
-  # 解决方法是从新修改用户root的密码，并指定mysql模块能够支持的加密方式：
-  ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456';
-  # 刷新权限
-  FLUSH PRIVILEGES;
-  ```
+```mysql
+# 新的mysql模块并未完全支持MySQL8的“caching_sha2_password”加密方式，而“caching_sha2_password”在MySQL 8中是默认的加密方式。
 
-  
+# 下面的方式命令是默认已经使用了“caching_sha2_password”加密方式，该账号、密码无法在mysql模块中使用。
+ALTER USER 'root'@'localhost' IDENTIFIED BY '123456'; 
 
-```javascript
-/**
-	npm install mysql
-*/
-const mysql = require('mysql')
 
-const connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '123456',
-  port: '3306',
-  database: 'myblog'
-})
-connection.connect()
-const sql = 'select * from users;'
-connection.query(sql, (error, result) => {
-  if (error) {
-    console.log(error)
-    return
-  }
-  console.log(result)
-})
-connection.end()
+# 解决方法是从新修改用户root的密码，并指定mysql模块能够支持的加密方式：
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '123456';
+# 刷新权限
+FLUSH PRIVILEGES;
 ```
+
+##### mysql2
+
+https://github.com/sidorares/node-mysql2/tree/master/documentation/zh-cn
+
+>  防止sql注入
+>
+>  用户通过注入sql语句到最终查询中，导致影响查询结果
+>
+>  msyql支持变量，变量不作为任何sql语句
+>
+>  使用execute不使用query
+
+##### ORM
+
+ORM：对象关系映射
+
+通过ORM框架，可以自动的吧程序中的对象和数据库关联
+
+ORM框架会隐藏具体的数据库底层细节，让开发者使用同样的数据操作接口，完成对数据库的操作
+
+node中的ORM：Sequelize TypeORM
+
+##### Sequelize
 
