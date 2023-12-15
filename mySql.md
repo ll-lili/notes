@@ -300,7 +300,7 @@ SELECT * FROM users WHERE username like '%s%' order by id desc; # 模糊查询�
 
 ##### 视图
 
-。。。
+理解：方便查询
 
 #### nodejs操作mySQL
 
@@ -342,4 +342,149 @@ ORM框架会隐藏具体的数据库底层细节，让开发者使用同样的�
 node中的ORM：Sequelize TypeORM
 
 ##### Sequelize
+
+https://www.sequelize.cn/
+
+>  报错：#initializeTTLTracking() {
+>
+> 肯能是node mysql2版本问题
+
+```shell
+#安装
+npm install --save sequelize
+# 你还必须手动为所选数据库安装驱动程序：
+npm install --save mysql2
+```
+
+```js
+// model/db.js
+const { Sequelize } = require('sequelize')
+const sequelize = new Sequelize('test', 'root', '123456', {
+  host: 'localhost',
+  dialect: 'mysql'
+})
+
+module.exports = sequelize
+
+// index.js 测试连接
+const sequelize = require('./models/db')
+;(async () => {
+  try {
+    await sequelize.authenticate()
+    console.log('Connection has been established successfully.')
+  } catch (error) {
+    console.error('Unable to connect to the database:', error)
+  }
+})()
+```
+
+###### 模型定义同步
+
+- `User.sync()` - 如果表不存在,则创建该表(如果已经存在,则不执行任何操作)
+- `User.sync({ force: true })` - 将创建表,如果表已经存在,则将其首先删除
+- `User.sync({ alter: true })` - 这将检查数据库中表的当前状态(它具有哪些列,它们的数据类型等),然后在表中进行必要的更改以使其与模型匹配.
+
+```js
+// model/User.js
+const sequelize = require('./db.js')
+const { DataTypes } = require('sequelize')
+
+const User = sequelize.define(
+  'User',
+  {
+    username: {
+      type: DataTypes.STRING(100),
+      allowNull: false
+    },
+    password: {
+      type: DataTypes.STRING(100),
+      allowNull: false
+    }
+  },
+  {
+    // freezeTableName: true 强制表名等于模型名
+    // tableName: 'Employees' 定义表名
+    // timestamps: false
+    paranoid: true // 该表的数据不会真正删除，而是增加一列deletedAt, 记录散出时间
+  }
+)
+;(async function () {
+  await User.sync({ alter: true })
+  console.log('同步User表')
+})()
+module.exports = User
+
+/*
+一次同步所有模型
+await sequelize.sync({ force: true });
+console.log("所有模型均已成功同步.");
+*/
+
+```
+
+
+
+#### 模拟数据（mockjs）
+
+```shell
+# 安装 http://mockjs.com/
+npm install mockjs
+```
+
+#### 数据抓取
+
+```js
+const Book = require('../models/Book')
+const superagent = require('superagent')
+const cheerio = require('cheerio')
+
+class FetchBooks {
+  URL = ''
+  data = []
+  constructor(url) {
+    this.URL = url
+  }
+  /**
+   * 获取html
+   * @returns string
+   */
+  async getHtml() {
+    const { text } = await superagent.get(this.URL)
+    return text
+  }
+  /**
+   * 获取目标信息
+   * @returns []
+   */
+  async getTargetInfo() {
+    const html = await this.getHtml()
+    const $ = cheerio.load(html)
+    const list = $('.chart-dashed-list .media')
+    list.map((i, el) => {
+      const arr = $(el).find('.media__body .subject-abstract').text().split('/')
+      this.data.push({
+        name: $(el).find('.media__body h2 a').text(),
+        imgurl: $(el).find('.media__img img').attr('src'),
+        publishDate: arr[1].trim(),
+        author: arr[0].trim()
+      })
+    })
+    this.saveDataToDb(this.data)
+    console.log(this.data)
+    return this.data
+  }
+  /**
+   * 保存数据到数据库
+   */
+  async saveDataToDb(data) {
+    await Book.bulkCreate(data)
+    console.log('保存数据到数据库成功！')
+  }
+}
+const ins = new FetchBooks(
+  'https://book.douban.com/latest?subcat=%E5%85%A8%E9%83%A8&p=2'
+)
+ins.getTargetInfo()
+
+```
 
