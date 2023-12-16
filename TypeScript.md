@@ -67,8 +67,9 @@ npm install @types/node --save
         "strictNullChecks": true, // 严格的空类型检查 
       	"removeComments": true, // 移除注释
       	"esModuleInterop": true, // 启用ES模块化交互非模块导出
-        "include": ["./src"], // 需要编译的文件目录
+        
     },
+  "include": ["./src"], // 需要编译的文件目录
     // "files": ["./src/index.ts"] // 需要编译的文件
     
 }
@@ -1073,5 +1074,234 @@ class A {
   }
 }
 
+```
+
+#### 练习
+
+```ts
+
+// 类装饰器
+function classDescriptor(desc: string) {
+  return (target: Function) => {
+    // 在类的原型上添加类的描述信息
+    target.prototype.$classDesction = desc
+  }
+}
+// 属性装饰器
+function propDescriptor (desc: string) {
+  return (target: any, prop: string) => {
+    // 在类的原型上添加属性的描述信息
+    if (!target.$propDesctions) {
+      target.$propDesctions = []
+    }
+    target.$propDesctions.push({
+      propDesc: desc,
+      propName: prop
+    })
+  }
+}
+@classDescriptor('用户')
+class User {
+  @propDescriptor('用户名')
+  username!: string
+  @propDescriptor('年龄')
+  age!: number
+}
+
+function printObj (obj: any) {
+  if (obj.$classDesction) {
+    console.log(obj.$classDesction)
+  } else {
+    console.log(Object.getPrototypeOf(obj).constructor.name)
+    console.log(obj.__proto__.constructor.name)
+  }
+  console.log(obj.$propDesctions)
+}
+const u = new User()
+printObj(u)
+```
+
+#### reflect- metadata
+
+该库作用：保存元数据
+
+```shell
+npm install reflect-metadata
+# https://github.com/rbuckton/reflect-metadata
+# https://www.jianshu.com/p/8fffb94b9978
+```
+
+```ts
+class C {
+  @Reflect.metadata(metadataKey, metadataValue)
+  method() {
+  }
+}
+
+let obj = new C();
+let metadataValue = Reflect.getMetadata(metadataKey, obj, "method");
+```
+
+#### class-validator和class-transformer
+
+```shell
+# https://github.com/typestack/class-validator
+```
+
+### 类型演算
+
+根据已知类型，计算出新的类型
+
+#### TS中typeof
+
+写在类型约束的位置。
+
+表示获取某个数据的类型
+
+```ts
+const u1 = {
+  name: 'll',
+  age: 22
+}
+type User = typeof u1
+/** 得到的结果
+type User = {
+    name: string;
+    age: number;
+}
+ */
+const u2: User = {
+	name: 'xx',
+  age: 33
+}
+```
+
+> 当typeof作用于类的时候，
+>
+> 得到的是该类的构造函数。
+
+#### keyof
+
+作用于类、接口、类型别名，用于获取其他类型中的所有成员名组成的联合类型。
+
+```ts
+type User = {
+    name: string;
+    age: number;
+}
+const u2: User = {
+	name: 'xx',
+  age: 33
+}
+function print (obj: User, prop: keyof User) {
+  console.log(obj[prop])
+}
+let key: keyof User
+for (key in u2) {
+  console.log(u2[key])
+}
+```
+
+#### in对象映射类型
+
+对象映射类型,只支持类型别名type
+
+该关键字往往和keyof联用，限制某个索引类型的取值范围(对象映射类型)
+
+```ts
+interface User {
+  name: string;
+  age: number;
+}
+
+type Obj = {
+  [prop in keyof User]: any
+}
+
+type User2 = {
+  [prop in keyof User]: User[prop]
+}
+type ReadyOnlyUser = {
+  readonly [prop in keyof User]: User[prop]
+}
+type Readonly<T> = {
+  readonly [P in keyof T]: T[P];
+}
+type PartialUser = {
+  [prop in keyof User]?: User[prop]
+} 
+type Partial<T> = {
+  [P in keyof T]?: T[P];
+}
+```
+
+#### 预定义类型
+
+```ts
+Partial<T> // 将类型T中的成员变为可选
+Required<T> // 将类型T中的成员变力必填
+Readonly<T> // 将类型T中的成员变为只读
+Exclude<T,U> // 从T中剔除可以賦值给u的类型。
+Extract<T,U> // 提取T中可以赋值给U的类型。
+NonNullable<T> // 从T中剔除nu11和undefined。
+ReturnType<T> //获取函数返回值类型。
+
+InstanceType<T> //获取构造函数类型的实例类型。
+```
+
+### 声明文件
+
+以`.d.ts`结尾的文件，就是TS声明文件。
+
+作用：为JS代码提供类型声明。
+
+位置：
+
+1. 放置到`tsconfig.json`配置中包含的目录。
+2. 放置到`node_modules/@types`文件夹中。
+3. 手动配置：在`tsconfig.json`中`compilerOptions`中配置`"typeRoots": [] `
+4. 与JS代码所在目录相同，并且文件名也相同的文件。
+
+#### 编写声明文件
+
+namespace: 表示命名空间，可以将其认为是一个对象。
+
+##### 全局声明
+
+```ts
+// 全局声明
+// global.d.ts
+interface Console {
+  log(message?: any): void
+}
+declare var console: Console
+
+
+declare namespace console {
+  let testProp: string
+  function wran (msg?:any): void
+}
+
+declare function setTimeOut(handler: () => void, miliSecond: number): number
+
+```
+
+##### 模块声明
+
+```ts
+// lodash.d.ts
+declare module 'lodash' {
+  export function chunk<T>(arr: T[], size: number): T[][]
+}
+
+```
+
+##### 三斜线指令
+
+在一个声明文件中包含另一个声明文件
+
+```ts
+// .d.ts
+/// <reference path="../lodash.d.ts" />
 ```
 
