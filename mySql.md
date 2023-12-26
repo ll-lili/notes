@@ -523,3 +523,43 @@ ins.getTargetInfo()
 
 ##### log4js
 
+```shell
+npm install log4js
+```
+
+```js
+const log4js = require('log4js')
+const path = require('path')
+log4js.configure({
+  // 日志类型
+  categories: {
+    sql: {
+      appenders: ['sql'],
+      level: 'all'
+    },
+    default: {
+      appenders: ['default'],
+      level: 'all'
+    }
+  },
+  // 日志出口
+  appenders: {
+    sql: {
+      type: 'file',
+      filename: path.resolve(__dirname, './logs/sql/logging.log')
+    },
+    default: {
+      type: 'file',
+      filename: path.resolve(__dirname, './logs/default/logging.log')
+    }
+  }
+})
+process.on('exit', () => {
+  log4js.shutdown()
+})
+const logger = log4js.getLogger('sql') // 日志分类，默认default
+
+logger.info('aaa')
+
+```
+
