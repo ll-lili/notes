@@ -358,7 +358,7 @@ const html = (
 // Demo.tsx
 import React, { FC, createContext, useState } from 'react'
 import Toolbar from './Toolbar'
-const temes = {
+const themes = {
     light: {
         fore: '#000',
         bg: '#eee'
@@ -369,8 +369,8 @@ const temes = {
     }
     
 }
-// 定义Context
-export conet TemeContext = createContext(themes.light)
+// 1.定义Context，并导出
+export const ThemeContext = createContext(themes.light)
 
 const Deom: FC = () => {
     const [theme, setTeme] = useState(themes.light)
@@ -378,6 +378,7 @@ const Deom: FC = () => {
         setTeme(themes.dark)
     }
     return (
+        {/* 2.使用 */}
     	<TemeContext.Provider value={theme}>
             <div>
                 <span> Conttext theme</span>
@@ -403,6 +404,7 @@ const Toolbar: FC = ()=> {
 import React, { FC, useContext } from 'react'
 import {TemeContext} from './Demo'
 const ThemeButton: FC = ()=> {
+    {/* 3.使用useContext，导入TemeContext */}
     const theme = useContext(TemeContext)
     const style = {
         color: theme.fore,
@@ -1260,7 +1262,7 @@ export const countSlice = createSlice({
     }
 })
 
-export const {increase, decrease} = countSilce.messageSlice
+export const {increase, decrease} = countSilce.actions
 export default countSilce.reducer
 /**
 * src/store/todoList.ts

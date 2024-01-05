@@ -1035,7 +1035,7 @@ export default function() {
 - category日志分类 ：sql日志 请求日志
 - appender日志出口： 写到哪里，输出格式
 
-##### log4js
+#### log4js
 
 ```shell
 npm install log4js
@@ -1098,3 +1098,168 @@ exports.defaultLogger = log4js.getLogger() // 日志分类，默认default
 app.use(log4js.connectLogger(apiLogger, { level: 'auto' }))
 ```
 
+### 文件上传
+
+#### multer中间件
+
+```shell
+$ npm install --save multer
+```
+
+```js
+const express = require('express')
+const multer = require('multer')
+const path = require('path')
+const { single } = require('../services/upload')
+
+const router = express.Router()
+
+const filePath = 'uploads'
+const storage = multer.diskStorage({
+  // 定义文件目录，需要手动创建
+  destination: function (req, file, cb) {
+    cb(null, path.resolve(__dirname, '../public', filePath))
+  },
+  // 定义文件名
+  filename: function (req, file, cb) {
+    cb(
+      null,
+      Date.now() +
+        Math.random().toString(36).slice(-6) +
+        path.extname(file.originalname)
+    )
+  }
+})
+
+const upload = multer({ storage })
+
+// 上传单个文件
+router.post('/single', upload.single('file'), (req, res, next) => {
+  const filename = single(req, filePath)
+  res.send(filename)
+})
+
+module.exports = router
+```
+
+```js
+exports.single = (req, filePath) => {
+  const filename =
+    req.protocol +
+    '://' +
+    req.get('host') +
+    '/' +
+    filePath +
+    '/' +
+    req.file.filename
+  return filename
+}
+
+```
+
+###  文件下载
+
+#### 响应头
+
+```
+Content-Disposition: attachment; filename="abc"
+Accept-Ranges: bytes // 断点续传 
+```
+
+
+
+```js
+const express = require('express')
+const path = require('path')
+
+const router = express.Router()
+
+router.get('/:filename', (req, res) => {
+  res.download(
+    path.resolve(__dirname, '../public/uploads/', req.params.filename),
+    'abc' + path.extname(req.params.filename)
+  )
+})
+module.exports = router
+```
+
+#### 触发迅雷下载
+
+```js
+const url = `AA${完整的下载地址}ZZ`
+url = btoa(url) // base64编码
+url = `thunder://${url}` // 迅雷协议
+
+```
+
+### 图片水印
+
+第三方库：jimp
+
+### 图片防盗链
+
+- req.headers.referer
+- req.headers.host
+
+```js
+const url = require('url')
+const path = require('path')
+module.exports = (req, res, next) => {
+  const host = req.headers.host // 本站主机名（包含端口）
+  const extname = path.extname(req.path)
+  const extnames = ['.jpg', '.png']
+  if (!extnames.includes(extname)) {
+    next()
+    return
+  }
+  let referer = req.headers.referer
+  if (referer) {
+    const format = new url.URL(referer)
+    referer = format.host
+  }
+  if (referer && referer !== host) {
+    req.url = 'uploads/11.jpg'
+    // res.status(404).end()
+    // return
+  }
+  next()
+}
+```
+
+### 代理
+
+```js
+const http = require('http')
+module.exports = (req, res, next) => {
+    if (!req.path.startsWidth('/api)) {
+        next()
+        return
+    }
+    const path = req.path.substring(5)
+   const request =  http.request({
+        host: 'target'
+        port: 300,
+        path: path,
+        method: req.method,
+        headers:req.headers
+    }, resp => {
+      res.status(resp.status)
+      for (const key in resp.headers) {
+          res.set(key, resp.headers[key])
+      }
+      resp.pipe(res)
+      
+   })
+   req.pipe(request) // 把请求体写入到代理对的请求体中
+}
+```
+
+
+
+#### http-proxy-middleware
+
+- https://github.com/chimurai/http-proxy-middleware
+
+### 验证码
+
+- svg-captcha
