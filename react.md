@@ -15,6 +15,10 @@
 
 #### Create React App
 
+```undefined
+npm install --legacy-peer-deps
+```
+
 ```shell
 npx create-react-app my-app
 
@@ -45,7 +49,7 @@ pnpm create vite my-vue-app --template react-ts
 
 ```shell
 npm i eslint --save-dev # 安装eslint
-npx eslint --init # 初始化eslint配置文件
+npx eslint --init # 初始化eslint配置文件 npm 版本建议6
 
 ./node_modules/.bin/eslint --init
 ✔ How would you like to use ESLint? · problems
@@ -202,6 +206,37 @@ echo "module.exports = {extends: ['@commitlint/config-conventional']}" > commitl
 # Add hook
 npx husky add .husky/commit-msg  'npx --no -- commitlint --edit ${1}'
 ```
+
+#### craco.js扩展webpack配置
+
+https://github.com/dilanx/craco
+
+https://craco.js.org
+
+```shell
+npm i -D @craco/craco
+
+```
+
+```
+  my-app
+  ├── node_modules
++ ├── craco.config.js
+  └── package.json
+```
+
+```
+"scripts": {
+-  "start": "react-scripts start"
++  "start": "craco start"
+-  "build": "react-scripts build"
++  "build": "craco build"
+-  "test": "react-scripts test"
++  "test": "craco test"
+}
+```
+
+
 
 ### JSX 语法
 

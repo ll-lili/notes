@@ -34,7 +34,7 @@ module.exports = [
 const Mock = require('mockjs')
 const Random = Mock.Random
 module.exports = [
-    [
+    {
         url:'/api/question/:id',
         method: 'get',
         reponse () {
@@ -46,7 +46,7 @@ module.exports = [
                 }
             }
         }
-    ]
+    }
 ]
 
 // mock/index.js
