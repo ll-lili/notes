@@ -128,17 +128,21 @@
 #### 外键
 
 - 用于产生表关系的列
-- 外键列回连接到另一张表
+- 外键列会连接到另一张表
 
 #### 表关系
 
-- 一对一
-- 一对多
-- 多对多
+- 一对一：一个A对应一个B，一个B对应一个A
+- 一对多：一个A对应多多个B，一个B对一一个A，A和B是一对多，B和A多对一
+  - 班级和学生
+  - 在多一端的表上设置外键，对应到另一张表的主键
+- 多对多：一个A对应多个B，一个B对应多个A
+  - 学生和老师
+  - 需要新键一张关系表，关系表至少包含两个外键，分别对应到两张表
 
 #### 三大设计范式
 
-1. 要求数据库表的每一项都是不可分割的原子数据项
+1. 要求数据库表的每一项都是不可分割的原子数据项（列不可分）
 2. 非主键列必须依赖于主键
 3. 非主键列必须直接依赖主键列
 #### mySQL常用操作
@@ -161,7 +165,7 @@ CREATE DATANASE testdb;
 SHOW DATABASES;
 ```
 
-##### 选择数据库
+##### 选择(切换)数据库
 
 ```mysql
 USE testdb;
@@ -249,12 +253,28 @@ SELECT * FROM users WHERE username like '%s%' order by id desc; # 模糊查询�
 ##### 联表查询
 
 - 笛卡尔积 ...from a,b
-- 左连接，左外连接，left join ...from a left join b
-- 右连接，右外连接，right join
-- 内连接，inner join ...from a inner join b
+- 左连接，左外连接 ：条件不满足至少出现一次
+- 右连接，右外连接 ：条件不满足至少出现一次
+- 内连接，条件必须满足
 
-```shell
-# ...from a,b
+```mysql
+# 对阵
+SELECT u1.username A, u2.username B from users u1, users u2 WHERE u1.id != u2.id;
+SELECT `username` A, `name` B from users, classes;
+# wangwu	前端 1 班
+# lisi	    前端 1 班
+#zhangsan	前端 1 班
+#wangwu	    前端 2 班
+#lisi	    前端 2 班
+#zhangsan	前端 2 班
+SELECT s.name A, c.name B from students s left join classes c on s.ClassId = c.id
+# 钱杰	前端 5 班
+# 段磊	前端 5 班
+# 林刚	前端 5 班
+# 谢洋	前端 5 班
+SELECT s.name A, c.name B from students s rigth join classes c on s.ClassId = c.id
+
+ SELECT s.name A, c.name B from students s inner join classes c on s.ClassId = c.id
 ```
 
 ##### 函数
@@ -267,13 +287,21 @@ SELECT * FROM users WHERE username like '%s%' order by id desc; # 模糊查询�
   - PI() 返回pi的值（圆周率）
   - RAND() 返回0到1的随机数
   - ROUND（x,y） 返回参数x的四舍五入的有y位的小数的值
-  - TRUNCATE（x,y）返回数字x截断短y位的小数的结果
+  - TRUNCATE（x,y）返回数字x截断y位的小数的结果
 - 聚合
   - AVG(col) 返回指定列的平均子
   - COUNT(col) 返回指定列中非NULL值的个数
   - MIN（col） 返回指定列的最小值
   - MAX(col)
   - SUM(col)
+
+```mysql
+select avg(value) from table
+SELECT COUNT(id) idcount from books
+```
+
+> 聚合列只有一行
+
 - 字符
   - CONCAT(s1, s2,...,Sn) 连接字符串
   - CONCAT_WS(sep,s1, s2,...,Sn) 连接字符串,并用sep字符间隔
