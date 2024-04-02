@@ -336,7 +336,7 @@ zhangsan.wait2() // zhangsan {}
 
 ##### apply/ bind /call
 
-* apply bind apply 的第一个参数改变this指向的对象
+* apply bind call的第一个参数改变this指向的对象
 * apply call 直接调用函数，bind则返回一个新函数
 * bind  call 第一个参数后面的参数为函数的参数，apply的参数需要传入一个数组
 
